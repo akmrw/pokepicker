@@ -4,76 +4,140 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Pokémon TCG Dex</title>
-        <meta name="description" content="Pokédex zum Organisieren der Pokémon TCG Sammelkarten">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="style.css">
-    </head>
-    <body>
-        <!--[if lt IE 7]>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Pokémon TCG Dex</title>
+    <meta name="description" content="Pokédex zum Organisieren der Pokémon TCG Sammelkarten">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Saira|Saira+Condensed">
+
+<body>
+    <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <header>
-            <h1>Pokémon TCG Dex</h1>
-        </header>
-        <nav>
-            <p>
-                <a href="#">Alle</a>
-                <a href="#">(Reverse) Holo</a>
-                <a href="#">Full-Art</a>
-                <a href="#">V / VMAX / ex</a>
-                <a href="#">Rares</a>
-            </p>
-        </nav>
-        <!--<aside>
+    <header>
+        <h1>Pokémon TCGdex</h1>
+    </header>
+    <nav>
+        <p>
+            <a href="#">Alle</a>
+            <a href="#">(Reverse) Holo</a>
+            <a href="#">Full-Art</a>
+            <a href="#">V / VMAX / ex</a>
+            <a href="#">Rares</a>
+        </p>
+    </nav>
+    <!--<aside>
             <ul>
                 <li>
                     <a href="#">Urlaubstipps</a>
                 </li>
             </ul>
         </aside>-->
-        <article>
-            <h2>Pokédex zum Organisieren der Pokémon TCG Sammelkarten</h2>
-            <P>
-            <table>
-                <tr>
-                    <th>Dex-Nr.</th>
-                    <th>Icon</th>
-                    <th>Name</th>
-                    <th>(Reverse) Holo</th>
-                    <th>Full-Art</th>
-                    <th>V / VMAX / ex</th>
-                    <th>Rares</th>
-                  </tr>
-                  <tr>
-                    <td>0001</td>
-                    <td><img src="https://www.pokewiki.de/images/thumb/d/d3/Hauptartwork_001.png/500px-Hauptartwork_001.png" alt="Bisasam"></td>
-                    <td><a href="https://www.pokewiki.de/Bisasam" target="_blank">Bisasam</td>
-                  </tr>
-                  <tr>
-                    <td>0002</td>
-                    <td><img src="https://www.pokewiki.de/images/thumb/c/c7/Hauptartwork_002.png/500px-Hauptartwork_002.png" alt="Bisasam"></td>
-                    <td><a href="https://www.pokewiki.de/Bisaknosp" target="_blank">Bisaknosp</td>
-                  </tr>
-                  <tr>
-                    <td>0003</td>
-                    <td><img src="https://www.pokewiki.de/images/thumb/1/1a/Hauptartwork_003.png/500px-Hauptartwork_003.png" alt="Bisasam"></td>
-                    <td><a href="https://www.pokewiki.de/Bisaflor" target="_blank">Bisaflor</td>
-                  </tr>
-            </table>
-            </P>
-        </article>
-        <footer>
-            <p>
-                <a href="#">Kontakt</a>
-                <a href="#">FAQ</a>
-            </p>
-        </footer>
-        
-        <script src="script.js" async defer></script>
-    </body>
+    <article>
+        <h2>Pokédex zum Organisieren der Pokémon TCG Sammelkarten</h2>
+        <P>
+        <table>
+            <tr>
+                <th>Dex-Nr.</th>
+                <th>Icon</th>
+                <th>Name</th>
+                <th>Karten</th>
+            </tr>
+            <tr>
+                <td class="dexnr">0001</td>
+                <td class="monimage"><img src="https://www.pokewiki.de/images/thumb/d/d3/Hauptartwork_001.png/500px-Hauptartwork_001.png"
+                        alt="Bisasam"></td>
+                <td class="monname"><a href="https://www.pokewiki.de/Bisasam" target="_blank">Bisasam</td>
+                <td>
+                    <form>
+                        <input type="checkbox" id="reverse_0001" name="reverse_0001" value="Reverse Holo">
+                        <label for="reverse_0001">Reverse Holo</label><br>
+                        <input type="checkbox" id="holo_0001" name="holo_0001" value="Holo">
+                        <label for="holo_0001">Holo</label><br>
+                        <input type="checkbox" id="fullart_0001" name="fullart_0001" value="Full-Art">
+                        <label for="fullart_0001">Full-Art</label><br>
+                        <input type="checkbox" id="v_0001" name="v_0001" value="V">
+                        <label for="v_0001">V</label><br>
+                        <input type="checkbox" id="vmax_0001" name="vmax_0001" value="VMAX">
+                        <label for="vmax_0001">VMAX</label><br>
+                        <input type="checkbox" id="ex_0001" name="ex_0001" value="ex">
+                        <label for="ex_0001">ex</label><br>
+                        <input type="checkbox" id="rare_0001" name="rare_0001" value="Rare">
+                        <label for="rare_0001">Rare</label><br>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td class="dexnr">0002</td>
+                <td class="monimage"><img src="https://www.pokewiki.de/images/thumb/c/c7/Hauptartwork_002.png/500px-Hauptartwork_002.png"
+                        alt="Bisasam"></td>
+                <td class="monname"><a href="https://www.pokewiki.de/Bisaknosp" target="_blank">Bisaknosp</td>
+                <td>
+                    <form>
+                        <input type="checkbox" id="reverse_0001" name="reverse_0001" value="Reverse Holo">
+                        <label for="reverse_0001">Reverse Holo</label><br>
+                        <input type="checkbox" id="holo_0001" name="holo_0001" value="Holo">
+                        <label for="holo_0001">Holo</label><br>
+                        <input type="checkbox" id="fullart_0001" name="fullart_0001" value="Full-Art">
+                        <label for="fullart_0001">Full-Art</label><br>
+                        <input type="checkbox" id="v_0001" name="v_0001" value="V">
+                        <label for="v_0001">V</label><br>
+                        <input type="checkbox" id="vmax_0001" name="vmax_0001" value="VMAX">
+                        <label for="vmax_0001">VMAX</label><br>
+                        <input type="checkbox" id="ex_0001" name="ex_0001" value="ex">
+                        <label for="ex_0001">ex</label><br>
+                        <input type="checkbox" id="rare_0001" name="rare_0001" value="Rare">
+                        <label for="rare_0001">Rare</label><br>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td class="dexnr">0003</td>
+                <td class="monimage"><img src="https://www.pokewiki.de/images/thumb/1/1a/Hauptartwork_003.png/500px-Hauptartwork_003.png"
+                        alt="Bisasam"></td>
+                <td class="monname"><a href="https://www.pokewiki.de/Bisaflor" target="_blank">Bisaflor</td>
+                <td>
+                    <form>
+                        <input type="checkbox" id="reverse_0001" name="reverse_0001" value="Reverse Holo">
+                        <label for="reverse_0001">Reverse Holo</label><br>
+                        <input type="checkbox" id="holo_0001" name="holo_0001" value="Holo">
+                        <label for="holo_0001">Holo</label><br>
+                        <input type="checkbox" id="fullart_0001" name="fullart_0001" value="Full-Art">
+                        <label for="fullart_0001">Full-Art</label><br>
+                        <input type="checkbox" id="v_0001" name="v_0001" value="V">
+                        <label for="v_0001">V</label><br>
+                        <input type="checkbox" id="vmax_0001" name="vmax_0001" value="VMAX">
+                        <label for="vmax_0001">VMAX</label><br>
+                        <input type="checkbox" id="ex_0001" name="ex_0001" value="ex">
+                        <label for="ex_0001">ex</label><br>
+                        <input type="checkbox" id="rare_0001" name="rare_0001" value="Rare">
+                        <label for="rare_0001">Rare</label><br>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td class="dexnr">...</td>
+                <td class="monimage">...</td>
+                <td class="monname">...</td>
+                <td>...</td>
+            </tr>
+        </table>
+        </P>
+    </article>
+    <footer>
+        <p>
+            <a href="mailto:alex@kmrw.de">Kontakt</a>
+        </p>
+    </footer>
+
+    <script src="script.js" async defer></script>
+</body>
+
 </html>
