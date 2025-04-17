@@ -69,6 +69,15 @@ td.dexnr, td.monimage, td.monname{
     text-align: center;
 }
 
+input {
+    text-align: center;
+}
+
+form.search {
+    text-align:center;
+    padding-bottom: 10px;
+}
+
 table { 
     margin-left: auto;
     margin-right: auto;
