@@ -64,6 +64,18 @@ table, th, td {
     padding: 15px;
 }
 
+#th_dex, #th_icon {
+    width: 100px;
+}
+
+#th_name {
+    width: 150px;
+}
+
+#th_karten {
+    width: 200px;
+}
+
 td.dexnr, td.monimage, td.monname{
 
     text-align: center;
@@ -75,11 +87,11 @@ input {
 }
 
 #search {
-    width: 200px;
+    width: 250px;
     margin-left: 10px;
 }
 
-form.search {
+div.search {
     text-align:center;
     padding-bottom: 10px;
 }
@@ -92,4 +104,3 @@ table {
 th {
     text-align: center;
 }
-

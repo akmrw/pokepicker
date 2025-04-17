@@ -38,19 +38,19 @@
     <article>
         <h2>Pokédex zum Organisieren der Pokémon TCG Sammelkarten</h2>
         <p>
-            <form class="search">
+            <div class="search">
                 <label for="search">Suche:</label>
-                <input type="search" id="search" name="search">
-            </form>
+                <input type="text" id="search" name="search" onkeyup="search()" placeholder="Pokédex-Nr. oder Name..">
+            </div>
         </p>
         <p>
         <table id="kartentabelle">
             <thead>
                 <tr>
-                    <th>Dex-Nr.</th>
-                    <th>Icon</th>
-                    <th>Name</th>
-                    <th>Karten</th>
+                    <th id="th_dex">Dex-Nr.</th>
+                    <th id="th_icon">Icon</th>
+                    <th id="th_name">Name</th>
+                    <th id="th_karten">Karten</th>
                 </tr>
             </thead>
             <tbody>
