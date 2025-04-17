@@ -71,6 +71,12 @@ td.dexnr, td.monimage, td.monname{
 
 input {
     text-align: center;
+    width: 20px;
+}
+
+#search {
+    width: 200px;
+    margin-left: 10px;
 }
 
 form.search {
@@ -87,7 +93,3 @@ th {
     text-align: center;
 }
 
-img {
-    height: 50px;
-    width: 50px;
-}
