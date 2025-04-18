@@ -30,31 +30,32 @@ fetch('http://localhost:3000/daten')
         <td class="monname"><a href="https://www.pokewiki.de/${eintrag.name}" target="_blank">${eintrag.name}</a></td>
         <td>
           <form>
-            <input type="input" id="reverse_${eintrag.dex}" name="reverse_${eintrag.dex}" value="${eintrag.reverse}">
-            <label for="reverse_${eintrag.dex}">Reverse Holo</label><br>
-            <input type="input" id="holo_${eintrag.dex}" name="holo_${eintrag.dex}" value="${eintrag.holo}">
+            <input class="cardIndex" type="input" id="reverse_${eintrag.dex}" name="reverse_${eintrag.dex}" value="${eintrag.reverse}">
+            <label for="reverse_${eintrag.dex}">Reverse Holo</label>
+            <input class="saveButton" type="button" id="save_reverse_${eintrag.dex}" onclick="save(reverse_${eintrag.dex})" value="Speichern!"><br>
+            <input class="cardIndex" type="input" id="holo_${eintrag.dex}" name="holo_${eintrag.dex}" value="${eintrag.holo}">
             <label for="holo_${eintrag.dex}">Holo</label><br>
-            <input type="input" id="v_${eintrag.dex}" name="v_${eintrag.dex}" value="${eintrag.v}">
+            <input class="cardIndex" type="input" id="v_${eintrag.dex}" name="v_${eintrag.dex}" value="${eintrag.v}">
             <label for="v_${eintrag.dex}">V</label><br>
-            <input type="input" id="vmax_${eintrag.dex}" name="vmax_${eintrag.dex}" value="${eintrag.vmax}">
+            <input class="cardIndex" type="input" id="vmax_${eintrag.dex}" name="vmax_${eintrag.dex}" value="${eintrag.vmax}">
             <label for="vmax_${eintrag.dex}">VMAX</label><br>
-            <input type="input" id="vstar_${eintrag.dex}" name="vstar_${eintrag.dex}" value="${eintrag.vstar}">
+            <input class="cardIndex" type="input" id="vstar_${eintrag.dex}" name="vstar_${eintrag.dex}" value="${eintrag.vstar}">
             <label for="vmax_${eintrag.dex}">VSTAR</label><br>
-            <input type="input" id="ex_${eintrag.dex}" name="ex_${eintrag.dex}" value="${eintrag.ex}">
+            <input class="cardIndex" type="input" id="ex_${eintrag.dex}" name="ex_${eintrag.dex}" value="${eintrag.ex}">
             <label for="ex_${eintrag.dex}">ex</label><br>
-            <input type="input" id="shiny_${eintrag.dex}" name="shiny_${eintrag.dex}" value="${eintrag.shiny}">
+            <input class="cardIndex" type="input" id="shiny_${eintrag.dex}" name="shiny_${eintrag.dex}" value="${eintrag.shiny}">
             <label for="shiny_${eintrag.dex}">Shiny</label><br>
-            <input type="input" id="fullart_${eintrag.dex}" name="fullart_${eintrag.dex}" value="${eintrag.fullart}">
+            <input class="cardIndex" type="input" id="fullart_${eintrag.dex}" name="fullart_${eintrag.dex}" value="${eintrag.fullart}">
             <label for="fullart_${eintrag.dex}">Full-Art</label><br>
-            <input type="input" id="rare_${eintrag.dex}" name="rare_${eintrag.dex}" value="${eintrag.rare}">
+            <input class="cardIndex" type="input" id="rare_${eintrag.dex}" name="rare_${eintrag.dex}" value="${eintrag.rare}">
             <label for="rare_${eintrag.dex}">Rare</label><br>
-            <input type="input" id="amazing_${eintrag.dex}" name="amazing_${eintrag.dex}" value="${eintrag.amazing}">
+            <input class="cardIndex" type="input" id="amazing_${eintrag.dex}" name="amazing_${eintrag.dex}" value="${eintrag.amazing}">
             <label for="amazing_${eintrag.dex}">Amazing</label><br>
-            <input type="input" id="rainbow_${eintrag.dex}" name="rainbow_${eintrag.dex}" value="${eintrag.rainbow}">
+            <input class="cardIndex" type="input" id="rainbow_${eintrag.dex}" name="rainbow_${eintrag.dex}" value="${eintrag.rainbow}">
             <label for="rainbow_${eintrag.dex}">Rainbow</label><br>
-            <input type="input" id="gold_${eintrag.dex}" name="gold_${eintrag.dex}" value="${eintrag.gold}">
+            <input class="cardIndex" type="input" id="gold_${eintrag.dex}" name="gold_${eintrag.dex}" value="${eintrag.gold}">
             <label for="gold_${eintrag.dex}">Gold</label><br>
-            <input type="input" id="custom_${eintrag.dex}" name="custom_${eintrag.dex}" value="${eintrag.custom}">
+            <input class="cardIndex" type="input" id="custom_${eintrag.dex}" name="custom_${eintrag.dex}" value="${eintrag.custom}">
             <label for="custom_${eintrag.dex}">Custom</label><br>
           </form>
         </td>
@@ -91,5 +92,11 @@ function search() {
         } 
       }
     }
+  }
 }
+
+function save(inputToBeSaved) {
+
+
+
 }

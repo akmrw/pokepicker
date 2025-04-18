@@ -73,7 +73,7 @@ table, th, td {
 }
 
 #th_karten {
-    width: 200px;
+    width: 250px;
 }
 
 td.dexnr, td.monimage, td.monname{
@@ -81,9 +81,23 @@ td.dexnr, td.monimage, td.monname{
     text-align: center;
 }
 
-input {
+.cardIndex {
     text-align: center;
     width: 20px;
+}
+
+.saveButton {
+    font-family: "Saira Condensed", sans-serif;
+    color: #DEDEDE;
+    background-color: #333333;
+    text-align: center;
+    width: 80px;
+    float: right;
+
+}
+
+.saveButton:hover {
+    color: #00AEFF;
 }
 
 #search {
