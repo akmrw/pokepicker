@@ -1,0 +1,10 @@
+{
+  "appId": "kmrw.tcgdex.app",
+  "appName": "tcgdex",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}
