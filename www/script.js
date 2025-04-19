@@ -1,4 +1,4 @@
-import { initDatabase, getDaten, updateFeld } from '../db-init.js';
+import { initDatabase, getDaten, updateFeld } from 'db-init.js';
 
 (async () => {
   
