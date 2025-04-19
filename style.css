@@ -91,9 +91,19 @@ td.dexnr, td.monimage, td.monname{
     color: #DEDEDE;
     background-color: #333333;
     text-align: center;
+    vertical-align: baseline;
     width: 80px;
+    height: 25px;
     float: right;
+    display: none;
+}
 
+.checkmark {
+    color: green;
+    float: inline-end;
+    text-align: center;
+    width: 80px;
+    display: none;
 }
 
 .saveButton:hover {
@@ -103,6 +113,7 @@ td.dexnr, td.monimage, td.monname{
 #search {
     width: 250px;
     margin-left: 10px;
+    text-align: center;
 }
 
 div.search {
