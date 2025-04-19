@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@capacitor-community/sqlite": "^7.0.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "mariadb": "^3.4.1",
-    "mysql": "^2.18.1"
-  }
-}
