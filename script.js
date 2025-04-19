@@ -5,9 +5,6 @@ import { initDatabase, getDaten, updateFeld } from './db-init.js';
   const db = await initDatabase();
   const data = await getDaten();
 
-  console.log('Lokal geladen:', data.values);
-  // Deine Logik zum Anzeigen bleibt gleich
-
   const tbody = document.querySelector('#kartentabelle tbody');
 
   for (const eintrag of data.values) {
