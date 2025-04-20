@@ -1,32 +1,73 @@
-<!doctype html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Awesome Capacitor App</title>
-    <meta
-      name="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
 
-    <script
-      type="module"
-      src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.js"
-    ></script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Pokémon TCGdex</title>
+    <meta name="description" content="Pokédex zum Organisieren der Pokémon TCG Sammelkarten">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
 
-    <link rel="icon" type="image/x-icon" href="/assets/favicon-UvKAN7pv.ico" />
-    <link rel="manifest" href="/assets/manifest-RD-sWVQA.json" />
-    <meta name="theme-color" content="#31d53d" />
-    <script type="module" crossorigin src="/assets/index-DyRbiu4w.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-C5y_fcH4.css">
-  </head>
-  <body>
-    <capacitor-welcome></capacitor-welcome>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Saira|Saira+Condensed">
 
-  </body>
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <header>
+        <h1>Pokémon TCGdex</h1>
+    </header>
+
+    <nav>
+        <p>
+            <a href="#">Alle</a>
+            <a href="#">(Reverse) Holo</a>
+            <a href="#">Full-Art</a>
+            <a href="#">V / VMAX / ex</a>
+            <a href="#">Rares</a>
+        </p>
+    </nav>
+
+    <article>
+        <h2>Pokédex zum Organisieren der Pokémon TCG Sammelkarten</h2>
+        <p>
+            <div class="search">
+                <label for="search">Suche:</label>
+                <input type="text" id="search" name="search" onkeyup="search()" placeholder="Pokédex-Nr. oder Name..">
+            </div>
+        </p>
+        <p>
+        <table id="kartentabelle">
+            <thead>
+                <tr>
+                    <th id="th_dex">Dex-Nr.</th>
+                    <th id="th_icon">Icon</th>
+                    <th id="th_name">Name</th>
+                    <th id="th_karten">Karten</th>
+                </tr>
+            </thead>
+            <tbody>
+                 <!-- Hier werden die Zeilen per JS eingefügt -->
+            </tbody>
+        </table>
+        </P>
+    </article>
+
+    <footer>
+        <p>
+            <a href="mailto:alex@kmrw.de">Kontakt</a>
+        </p>
+    </footer>
+
+    <script src="script.js" async defer></script>
+
+</body>
+
 </html>
