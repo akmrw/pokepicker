@@ -102,6 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       tbody.appendChild(tr);
+      console.log("Zeile eingefügt für:", eintrag.name);
+
     }
 
     function search() {
