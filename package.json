@@ -1,16 +1,13 @@
 {
-  "name": "capacitor-app",
+  "name": "tcgdex",
   "version": "1.0.0",
-  "description": "An Amazing Capacitor App",
-  "type": "module",
+  "description": "tcgdex-App",
   "keywords": [
     "capacitor",
     "mobile"
   ],
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node build.js"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^7.0.0",
@@ -21,8 +18,18 @@
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
+    "esbuild": "^0.25.2",
     "vite": "^5.4.2"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akmrw/tcgdex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akmrw/tcgdex/issues"
+  },
+  "homepage": "https://github.com/akmrw/tcgdex#readme"
 }
