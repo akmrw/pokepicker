@@ -1,10 +1,6 @@
 {
-  "appId": "kmrw.tcgdex.app",
+  "appId": "de.kmrw.tcgdex",
   "appName": "tcgdex",
   "webDir": "www",
-  "plugins": {
-    "SplashScreen": {
-      "launchAutoHide": false
-    }
-  }
+  "bundledWebRuntime": false
 }
