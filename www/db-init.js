@@ -8,7 +8,7 @@ export async function initDatabase() {
   await db.open();
 
   // Tabelle löschen, falls vorhanden (NUR FÜR DEVENV, NICHT PROD)
-  await db.execute(`DROP TABLE IF EXISTS kartendex`);
+  //await db.execute(`DROP TABLE IF EXISTS kartendex`);
 
   // Tabelle anlegen
   await db.execute(`

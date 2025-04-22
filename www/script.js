@@ -6,8 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await getDaten();
 
     const tbody = document.querySelector('#kartentabelle tbody');
-    console.log("Tabelle gefunden:", tbody);
-    console.log("Daten geladen:", data);
 
     for (const eintrag of data.values) {
       const tr = document.createElement('tr');
@@ -28,81 +26,114 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!eintrag.gold) { eintrag.gold = "" }
       if (!eintrag.custom) { eintrag.custom = "" }
 
-      tr.innerHTML = `
+      let html = `
         <td class="dexnr">${eintrag.dex}</td>
-        <td class="monimage"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${dexNr}.png" alt="${eintrag.name}"></td>
-        <td class="monname"><a href="https://www.pokewiki.de/${eintrag.name}" target="_blank">${eintrag.name}</a></td>
-        <td>
-          <input class="cardIndex" type="input" id="reverse_${eintrag.dex}" name="reverse_${eintrag.dex}" value="${eintrag.reverse}" onkeyup="showSaveButton(save_reverse_${eintrag.dex})">
-          <label for="reverse_${eintrag.dex}">Reverse Holo</label>
-          <input class="saveButton" type="button" id="save_reverse_${eintrag.dex}" onclick="save(reverse_${eintrag.dex}, save_reverse_${eintrag.dex}, checkmark_reverse_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_reverse_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="holo_${eintrag.dex}" name="holo_${eintrag.dex}" value="${eintrag.holo}" onkeyup="showSaveButton(save_holo_${eintrag.dex})">
-          <label for="holo_${eintrag.dex}">Holo</label>
-          <input class="saveButton" type="button" id="save_holo_${eintrag.dex}" onclick="save(holo_${eintrag.dex}, save_holo_${eintrag.dex}, checkmark_holo_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_holo_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="v_${eintrag.dex}" name="v_${eintrag.dex}" value="${eintrag.v}" onkeyup="showSaveButton(save_v_${eintrag.dex})">
-          <label for="v_${eintrag.dex}">V</label>
-          <input class="saveButton" type="button" id="save_v_${eintrag.dex}" onclick="save(v_${eintrag.dex}, save_v_${eintrag.dex}, checkmark_v_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_v_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="vmax_${eintrag.dex}" name="vmax_${eintrag.dex}" value="${eintrag.vmax}" onkeyup="showSaveButton(save_vmax_${eintrag.dex})">
-          <label for="vmax_${eintrag.dex}">VMAX</label>
-          <input class="saveButton" type="button" id="save_vmax_${eintrag.dex}" onclick="save(vmax_${eintrag.dex}, save_vmax_${eintrag.dex}, checkmark_vmax_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_vmax_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="vstar_${eintrag.dex}" name="vstar_${eintrag.dex}" value="${eintrag.vstar}" onkeyup="showSaveButton(save_vstar_${eintrag.dex})">
-          <label for="vstar_${eintrag.dex}">VSTAR</label>
-          <input class="saveButton" type="button" id="save_vstar_${eintrag.dex}" onclick="save(vstar_${eintrag.dex}, save_vstar_${eintrag.dex}, checkmark_vstar_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_vstar_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="ex_${eintrag.dex}" name="ex_${eintrag.dex}" value="${eintrag.ex}" onkeyup="showSaveButton(save_ex_${eintrag.dex})">
-          <label for="ex_${eintrag.dex}">ex</label>
-          <input class="saveButton" type="button" id="save_ex_${eintrag.dex}" onclick="save(ex_${eintrag.dex}, save_ex_${eintrag.dex}, checkmark_ex_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_ex_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="shiny_${eintrag.dex}" name="shiny_${eintrag.dex}" value="${eintrag.shiny}" onkeyup="showSaveButton(save_shiny_${eintrag.dex})">
-          <label for="shiny_${eintrag.dex}">Shiny</label>
-          <input class="saveButton" type="button" id="save_shiny_${eintrag.dex}" onclick="save(shiny_${eintrag.dex}, save_shiny_${eintrag.dex}, checkmark_shiny_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_shiny_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="fullart_${eintrag.dex}" name="fullart_${eintrag.dex}" value="${eintrag.fullart}" onkeyup="showSaveButton(save_fullart_${eintrag.dex})">
-          <label for="fullart_${eintrag.dex}">Full-Art</label>
-          <input class="saveButton" type="button" id="save_fullart_${eintrag.dex}" onclick="save(fullart_${eintrag.dex}, save_fullart_${eintrag.dex}, checkmark_fullart_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_fullart_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="rare_${eintrag.dex}" name="rare_${eintrag.dex}" value="${eintrag.rare}" onkeyup="showSaveButton(save_rare_${eintrag.dex})">
-          <label for="rare_${eintrag.dex}">Rare</label>
-          <input class="saveButton" type="button" id="save_rare_${eintrag.dex}" onclick="save(rare_${eintrag.dex}, save_rare_${eintrag.dex}, checkmark_rare_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_rare_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="amazing_${eintrag.dex}" name="amazing_${eintrag.dex}" value="${eintrag.amazing}" onkeyup="showSaveButton(save_amazing_${eintrag.dex})">
-          <label for="amazing_${eintrag.dex}">Amazing</label>
-          <input class="saveButton" type="button" id="save_amazing_${eintrag.dex}" onclick="save(amazing_${eintrag.dex}, save_amazing_${eintrag.dex}, checkmark_amazing_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_amazing_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="rainbow_${eintrag.dex}" name="rainbow_${eintrag.dex}" value="${eintrag.rainbow}" onkeyup="showSaveButton(save_rainbow_${eintrag.dex})">
-          <label for="rainbow_${eintrag.dex}">Rainbow</label>
-          <input class="saveButton" type="button" id="save_rainbow_${eintrag.dex}" onclick="save(rainbow_${eintrag.dex}, save_rainbow_${eintrag.dex}, checkmark_rainbow_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_rainbow_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="gold_${eintrag.dex}" name="gold_${eintrag.dex}" value="${eintrag.gold}" onkeyup="showSaveButton(save_gold_${eintrag.dex})">
-          <label for="gold_${eintrag.dex}">Gold</label>
-          <input class="saveButton" type="button" id="save_gold_${eintrag.dex}" onclick="save(gold_${eintrag.dex}, save_gold_${eintrag.dex}, checkmark_gold_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_gold_${eintrag.dex}">&#10003;</div>
-          <br>
-          <input class="cardIndex" type="input" id="custom_${eintrag.dex}" name="custom_${eintrag.dex}" value="${eintrag.custom}" onkeyup="showSaveButton(save_custom_${eintrag.dex})">
-          <label for="custom_${eintrag.dex}">Custom</label>
-          <input class="saveButton" type="button" id="save_custom_${eintrag.dex}" onclick="save(custom_${eintrag.dex}, save_custom_${eintrag.dex}, checkmark_custom_${eintrag.dex})" value="Speichern!">
-          <div class="checkmark" id="checkmark_custom_${eintrag.dex}">&#10003;</div>
-          <br>
+        <td class="pokemon">
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${dexNr}.png" alt="${eintrag.name}"><br>
+          <a href="https://www.pokewiki.de/${eintrag.name}" target="_blank">${eintrag.name}</a>
         </td>
+        <td id="td_${eintrag.dex}">
       `;
 
+      const typen = ['reverse', 'holo', 'v', 'vmax', 'vstar', 'ex', 'shiny', 'fullart', 'rare', 'amazing', 'rainbow', 'gold', 'custom'];
+      let hatLeereFelder = false;
+
+      typen.forEach(type => {
+        const value = eintrag[type];
+        const istLeer = (value === "" || value === null || value === undefined);
+        if (istLeer) hatLeereFelder = true;
+
+        html += `
+          <div class="kartenContainer ${istLeer ? 'versteckt' : ''}" id="container_${type}_${eintrag.dex}">
+            <input class="kartenAnzahl" type="input"
+                  id="${type}_${eintrag.dex}"
+                  name="${type}_${eintrag.dex}"
+                  value="${value || ''}"
+                  oninput="toggleSaveButton('${type}', '${eintrag.dex}')">
+
+            <span id="labelOrButton_${type}_${eintrag.dex}">
+              <label for="${type}_${eintrag.dex}">${type.toUpperCase()}</label>
+            </span>
+
+            <div class="checkmark" id="checkmark_${type}_${eintrag.dex}">&#10003;</div>
+            <br>
+          </div>
+        `;
+      });
+
+      if (hatLeereFelder) {
+        html += `
+          <button id="neueKarteBtn_${eintrag.dex}" onclick="zeigeAlleFelder('${eintrag.dex}')">+ Neue Karte</button>
+          <button id="abbrechenBtn_${eintrag.dex}" onclick="versteckeLeereFelder('${eintrag.dex}')" class="versteckt">Fertig</button>
+        `;
+      }
+
+      html += `</td>`;
+      tr.innerHTML = html;
+
       tbody.appendChild(tr);
-      console.log("Zeile eingefügt für:", eintrag.name);
+
+      // Zeigt alle (auch leere) Felder an und wechselt Button
+      window.zeigeAlleFelder = function (dex) {
+        typen.forEach(type => {
+          const el = document.getElementById(`container_${type}_${dex}`);
+          if (el) el.classList.remove('versteckt');
+        });
+
+        document.getElementById(`neueKarteBtn_${dex}`)?.classList.add('versteckt');
+        document.getElementById(`abbrechenBtn_${dex}`)?.classList.remove('versteckt');
+      };
+
+      // Blendet leere Felder wieder aus und wechselt Button zurück
+      window.versteckeLeereFelder = function (dex) {
+        typen.forEach(type => {
+          const input = document.getElementById(`${type}_${dex}`);
+          const container = document.getElementById(`container_${type}_${dex}`);
+          if (input && container && !input.value.trim()) {
+            container.classList.add('versteckt');
+          }
+        });
+
+        document.getElementById(`neueKarteBtn_${dex}`)?.classList.remove('versteckt');
+        document.getElementById(`abbrechenBtn_${dex}`)?.classList.add('versteckt');
+      };
+
+      // Zeigt entweder Label oder Speichern-Button je nach Eingabe
+      window.toggleSaveButton = function(type, dex) {
+        const inputId = `${type}_${dex}`;
+        const spanId = `labelOrButton_${type}_${dex}`;
+        const input = document.getElementById(inputId);
+        const span = document.getElementById(spanId);
+
+        if (!input || !span) return;
+
+        if (input.value.trim() !== "") {
+          span.innerHTML = `
+            <input class="saveButton" type="button"
+                  onclick="saveUndReset('${type}', '${dex}')"
+                  value="Speichern!">
+          `;
+        } else {
+          span.innerHTML = `<label for="${inputId}">${type.toUpperCase()}</label>`;
+        }
+      };
+
+      // Speichert den Wert und setzt das Label zurück
+      window.saveUndReset = function(type, dex) {
+        const inputId = `${type}_${dex}`;
+        const input = document.getElementById(inputId);
+        const checkmark = document.getElementById(`checkmark_${inputId}`);
+      
+        if (input) {
+          save(input, checkmark); // Bestehende Speicherfunktion
+        }
+      
+        // Nach dem Speichern zurück zum Label
+        const span = document.getElementById(`labelOrButton_${type}_${dex}`);
+        if (span) {
+          span.innerHTML = `<label for="${inputId}">${type.toUpperCase()}</label>`;
+        }
+      };
 
     }
 
@@ -131,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
       buttonToShow.style.display = "inline";
     };
 
-    window.save = async function (inputToSave, buttonToHide, checkmarkToShow) {
+    window.save = async function (inputToSave, checkmarkToShow) {
       let wert = inputToSave.value;
       const zielArray = inputToSave.name.split("_");
       const feld = zielArray[0];
@@ -143,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         await updateFeld(dex, feld, wert);
-        buttonToHide.style.display = "none";
         checkmarkToShow.style.display = "inline";
         setTimeout(() => {
           checkmarkToShow.style.display = "none";

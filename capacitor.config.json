@@ -1,6 +1,6 @@
 {
   "appId": "de.kmrw.tcgdex",
-  "appName": "tcgdex",
+  "appName": "TCGdex",
   "webDir": "www",
   "bundledWebRuntime": false
 }

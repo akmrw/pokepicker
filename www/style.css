@@ -2,13 +2,14 @@
 
 h1 {
     text-align: center;
+    margin-top: 75px;
 }
 
 nav {
     text-align: center;
 }
 
-nav p a {
+nav a {
     margin-left: 15px;
     margin-right: 15px;
 }
@@ -16,14 +17,6 @@ nav p a {
 h2 {
     text-align: center;
 }
-
-/*article {
-    
-}
-
-p {
-
-}*/
 
 footer {
     text-align: center;
@@ -64,24 +57,23 @@ table, th, td {
     padding: 15px;
 }
 
-#th_dex, #th_icon {
-    width: 100px;
+#th_dex {
+    width: 50px;
 }
 
-#th_name {
-    width: 150px;
+#th_pokemon {
+    width: 100px;
 }
 
 #th_karten {
     width: 250px;
 }
 
-td.dexnr, td.monimage, td.monname{
-
+td.dexnr, td.pokemon {
     text-align: center;
 }
 
-.cardIndex {
+.kartenAnzahl {
     text-align: center;
     width: 20px;
 }
@@ -94,15 +86,11 @@ td.dexnr, td.monimage, td.monname{
     vertical-align: baseline;
     width: 80px;
     height: 25px;
-    float: right;
-    display: none;
 }
 
 .checkmark {
     color: green;
     float: inline-end;
-    text-align: center;
-    width: 80px;
     display: none;
 }
 
@@ -111,7 +99,7 @@ td.dexnr, td.monimage, td.monname{
 }
 
 #search {
-    width: 250px;
+    width: 200px;
     margin-left: 10px;
     text-align: center;
 }
@@ -128,4 +116,8 @@ table {
 
 th {
     text-align: center;
+}
+
+.versteckt {
+    display: none;
 }
