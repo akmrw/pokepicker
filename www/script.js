@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (hatLeereFelder) {
         html += `
           <button id="neueKarteBtn_${eintrag.dex}" onclick="zeigeAlleFelder('${eintrag.dex}')">+ Neue Karte</button>
-          <button id="abbrechenBtn_${eintrag.dex}" onclick="versteckeLeereFelder('${eintrag.dex}')" class="versteckt">Fertig</button>
+          <button id="abbrechenBtn_${eintrag.dex}" onclick="versteckeLeereFelder('${eintrag.dex}')" class="versteckt">Schließen</button>
         `;
       }
 
@@ -183,5 +183,91 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Speichern fehlgeschlagen.");
       }
     };
+
+    const filterZustand = {
+      holo: false,
+      fullart: false,
+      vfamily: false,
+      rares: false
+    };
+    
+    function filterTabelle(filterName, felder) {
+
+      const link = document.getElementById(`filter-${filterName}`);
+      const isActive = filterZustand[filterName];
+    
+      // Toggle Zustand
+      filterZustand[filterName] = !isActive;
+    
+      const rows = document.querySelectorAll('#kartentabelle tbody tr');
+    
+      rows.forEach(row => {
+        let hasMatch = false;
+    
+        felder.forEach(feld => {
+          const input = row.querySelector(`input[id^="${feld}_"]`);
+          const val = input?.value?.trim();
+          if (val && val !== "0") {
+            hasMatch = true;
+          }
+        });
+    
+        if (!isActive) {
+          // Erster Klick = positive Filterung → zeigen wenn etwas da ist
+          row.style.display = hasMatch ? "" : "none";
+        } else {
+          // Zweiter Klick = negative Filterung → zeigen wenn NICHTS da ist
+          row.style.display = hasMatch ? "none" : "";
+        }
+      });
+    
+      // Visuelles Feedback
+      // Entferne zuerst alle anderen farbigen Klassen
+      document.querySelectorAll('nav a').forEach(a => {
+        a.classList.remove('active-positive', 'active-negative');
+      });
+    
+      if (!isActive) {
+        link.classList.add('active-positive');
+      } else {
+        link.classList.add('active-negative');
+      }
+
+    }    
+    
+    // Klick-Handler
+    document.getElementById("filter-holo").addEventListener("click", e => {
+      e.preventDefault();
+      filterTabelle("holo", ["reverse", "holo"]);
+    });
+    
+    document.getElementById("filter-fullart").addEventListener("click", e => {
+      e.preventDefault();
+      filterTabelle("fullart", ["fullart"]);
+    });
+    
+    document.getElementById("filter-vfamily").addEventListener("click", e => {
+      e.preventDefault();
+      filterTabelle("vfamily", ["v", "vmax", "vstar", "ex"]);
+    });
+    
+    document.getElementById("filter-rares").addEventListener("click", e => {
+      e.preventDefault();
+      filterTabelle("rares", ["shiny", "rare", "amazing", "rainbow", "gold"]);
+    });
+    
+    // "Alle" zeigt wieder alle Zeilen an
+    document.getElementById("filter-alle").addEventListener("click", e => {
+      e.preventDefault();
+      Object.keys(filterZustand).forEach(k => filterZustand[k] = false);
+      const rows = document.querySelectorAll('#kartentabelle tbody tr');
+      rows.forEach(row => row.style.display = "");
+
+      // Farben zurücksetzen
+      document.querySelectorAll('nav a').forEach(a => {
+        a.classList.remove('active-positive', 'active-negative');
+      });
+    });
+
   })();
 });

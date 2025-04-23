@@ -121,3 +121,11 @@ th {
 .versteckt {
     display: none;
 }
+
+nav a.active-positive {
+    color: green;
+}
+
+nav a.active-negative {
+    color: red;
+}
