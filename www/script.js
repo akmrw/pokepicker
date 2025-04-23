@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         html += `
           <div class="kartenContainer ${istLeer ? 'versteckt' : ''}" id="container_${type}_${eintrag.dex}">
-            <input class="kartenAnzahl" type="input"
+            <input class="kartenAnzahl" type="number" min="0" max="999"
                   id="${type}_${eintrag.dex}"
                   name="${type}_${eintrag.dex}"
                   value="${value || ''}"
