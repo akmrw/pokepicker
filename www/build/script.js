@@ -1054,7 +1054,7 @@
         <td id="td_${s.dex}">
       `,b=["reverse","holo","v","vmax","vstar","ex","shiny","fullart","rare","amazing","rainbow","gold","custom"],p=!1;b.forEach(o=>{let h=s[o],y=h===""||h===null||h===void 0;y&&(p=!0),d+=`
           <div class="kartenContainer ${y?"versteckt":""}" id="container_${o}_${s.dex}">
-            <input class="kartenAnzahl" type="input"
+            <input class="kartenAnzahl" type="number" min="0" max="999"
                   id="${o}_${s.dex}"
                   name="${o}_${s.dex}"
                   value="${h||""}"
