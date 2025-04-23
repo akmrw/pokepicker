@@ -37,7 +37,7 @@ After entering all of your cards for that Pok√©mon you can click on the "Schlie√
 
 The whole app is based on HTML, CSS and JavaScript for frontend.<br/>
 Node.js and SQLite is used for backend and database functionality.<br/>
-ESbuild is used for building the iOS app.
+Capacitor and ESbuild is used for building the iOS app.
 
 ### How to build and simulate app:
 
