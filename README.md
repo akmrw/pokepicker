@@ -48,4 +48,5 @@ Capacitor and ESbuild is used for building the iOS app.
 5. ```npx cap open ios```
 
 This builds the app and opens Xcode. From there you can simulate the app using the Xcode simualator.<br/>
-You can also enable developer mode on your iPhone to build the app on you phone. WARNING: enabling developer mode reduces security measures on your device.
+You can also enable developer mode on your iPhone to build the app on you phone. Xcode can guide you through configuring your iPhone.<br/>
+WARNING: enabling developer mode reduces security measures on your device.
