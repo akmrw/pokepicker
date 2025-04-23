@@ -72,6 +72,16 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = html;
 
       tbody.appendChild(tr);
+      updateEintragsAnzahl();
+
+      function updateEintragsAnzahl() {
+        const rows = document.querySelectorAll('#kartentabelle tbody tr');
+        let sichtbareZeilen = 0;
+        rows.forEach(row => {
+          if (row.style.display !== "none") sichtbareZeilen++;
+        });
+        document.getElementById('eintragsAnzahl').textContent = `(${sichtbareZeilen})`;
+      }
 
       // Zeigt alle (auch leere) Felder an und wechselt Button
       window.zeigeAlleFelder = function (dex) {
@@ -154,6 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       }
+
+      updateEintragsAnzahl();
     }
 
     window.search = search; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
@@ -233,6 +245,8 @@ document.addEventListener("DOMContentLoaded", () => {
         link.classList.add('active-negative');
       }
 
+      updateEintragsAnzahl();
+
     }    
     
     // Klick-Handler
@@ -267,6 +281,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll('nav a').forEach(a => {
         a.classList.remove('active-positive', 'active-negative');
       });
+
+      updateEintragsAnzahl();
+
     });
 
   })();
