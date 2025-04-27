@@ -1,14 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
   (async () => {
-    const { initDatabase, getDaten, updateFeld } = await import('./db-init.js');
 
+    //Overlays definieren
+    const overlay = document.getElementById("overlay");
+    
+    //SQLite-Datenbank-Initialisierung
+    const { initDatabase, getDaten, updateFeld, getName } = await import("./db-init.js");
     const db = await initDatabase();
     const data = await getDaten();
 
-    const tbody = document.querySelector('#kartentabelle tbody');
+    //Tabelle definieren
+    const tbody = document.querySelector("#kartentabelle tbody");
 
+    //Tabelle aus Datenbank füllen
     for (const eintrag of data.values) {
-      const tr = document.createElement('tr');
+      const tr = document.createElement("tr");
 
       let dexNr = parseInt(eintrag.dex);
 
@@ -26,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!eintrag.gold) { eintrag.gold = "" }
       if (!eintrag.custom) { eintrag.custom = "" }
 
+      //Tabellenspalten mit Dex-Nr., Pokémon-Name und -Bild füllen
       let html = `
         <td class="dexnr">${eintrag.dex}</td>
         <td class="pokemon">
@@ -35,118 +42,153 @@ document.addEventListener("DOMContentLoaded", () => {
         <td id="td_${eintrag.dex}">
       `;
 
-      const typen = ['reverse', 'holo', 'v', 'vmax', 'vstar', 'ex', 'shiny', 'fullart', 'rare', 'amazing', 'rainbow', 'gold', 'custom'];
+      const typen = ["reverse", "holo", "v", "vmax", "vstar", "ex", "shiny", "fullart", "rare", "amazing", "rainbow", "gold", "custom"];
       let hatLeereFelder = false;
 
+      //Tabellenzeile mit vorhandenen Karten aus Datenbank füllen
       typen.forEach(type => {
         const value = eintrag[type];
         const istLeer = (value === "" || value === null || value === undefined);
         if (istLeer) hatLeereFelder = true;
 
         html += `
-          <div class="kartenContainer ${istLeer ? 'versteckt' : ''}" id="container_${type}_${eintrag.dex}">
-            <input class="kartenAnzahl" type="number" min="0" max="999"
-                  id="${type}_${eintrag.dex}"
-                  name="${type}_${eintrag.dex}"
-                  value="${value || ''}"
-                  oninput="toggleSaveButton('${type}', '${eintrag.dex}')">
+            <div class="kartenContainer ${istLeer ? "hidden" : ""}" id="container_${type}_${eintrag.dex}">
+              <input class="kartenAnzahl" type="number" readonly
+                    id="${type}_${eintrag.dex}"
+                    name="${type}_${eintrag.dex}"
+                    value="${value || ''}">
 
-            <span id="labelOrButton_${type}_${eintrag.dex}">
-              <label for="${type}_${eintrag.dex}">${type.toUpperCase()}</label>
-            </span>
-
-            <div class="checkmark" id="checkmark_${type}_${eintrag.dex}">&#10003;</div>
-            <br>
-          </div>
+              <div class="checkmark" id="checkmark_${type}_${eintrag.dex}">&#10003;</div>
+              <br>
+            </div>
         `;
       });
 
-      if (hatLeereFelder) {
-        html += `
-          <button id="neueKarteBtn_${eintrag.dex}" onclick="zeigeAlleFelder('${eintrag.dex}')">+ Neue Karte</button>
-          <button id="abbrechenBtn_${eintrag.dex}" onclick="versteckeLeereFelder('${eintrag.dex}')" class="versteckt">Schließen</button>
-        `;
-      }
+      html += `
+          <button id="neueKarteBtn_${eintrag.dex}" onclick="openOverlay('${eintrag.dex}')">+ Neue Karte</button>
+        </td>
+      `
 
-      html += `</td>`;
       tr.innerHTML = html;
-
       tbody.appendChild(tr);
       updateEintragsAnzahl();
 
-      function updateEintragsAnzahl() {
-        const rows = document.querySelectorAll('#kartentabelle tbody tr');
-        let sichtbareZeilen = 0;
-        rows.forEach(row => {
-          if (row.style.display !== "none") sichtbareZeilen++;
+    }
+
+    //Aktualisieren der gezeigten Anzahl der Tabellen-Einträge
+    function updateEintragsAnzahl() {
+      const rows = document.querySelectorAll("#kartentabelle tbody tr");
+      let sichtbareZeilen = 0;
+      //zählt alle nicht versteckten (also sichtbaren) Zeilen
+      rows.forEach(row => {
+        if (row.style.display !== "none") sichtbareZeilen++;
+      });
+      document.getElementById("eintragsAnzahl").textContent = `(${sichtbareZeilen})`;
+    }
+
+    //Öffnet das Overlay zum Aussuchen des neuen Kartentyps nach Klick auf Button "+ Neue Karte"
+    window.openOverlay = function (dex) {
+
+      const overlayElement = document.querySelector("#overlay");
+      
+      // Vorherigen Inhalt löschen
+      overlayElement.innerHTML = "";
+    
+      // HTML für Overlaycontent
+      let html = `
+        <div id="overlayContent">
+          <h2>Art der Karte</h2>
+          <p>Um was für eine Art von Karte handelt es sich?</p>
+          <button class="overlayTypBtn" id="btnReverse_${dex}">Reverse Holo</button>
+          <button class="overlayTypBtn" id="btnHolo_${dex}">Holo</button>
+          <br>
+          <button class="overlayTypBtn" id="btnV_${dex}">V</button>
+          <button class="overlayTypBtn" id="btnVMAX_${dex}">VMAX</button>
+          <button class="overlayTypBtn" id="btnVSTAR_${dex}">VSTAR</button>
+          <button class="overlayTypBtn" id="btnEx_${dex}">ex</button>
+          <br>
+          <button class="overlayTypBtn" id="btnShiny_${dex}">Shiny</button>
+          <button class="overlayTypBtn" id="btnFullart_${dex}">Full-Art</button>
+          <br>
+          <button class="overlayTypBtn" id="btnRare_${dex}">Rare</button>
+          <button class="overlayTypBtn" id="btnAmazing_${dex}">Amazing</button>
+          <button class="overlayTypBtn" id="btnRainbow_${dex}">Rainbow</button>
+          <button class="overlayTypBtn" id="btnGold_${dex}">Gold</button>
+          <br>
+          <button class="overlayTypBtn" id="btnCustom_${dex}">Custom</button>
+          <br><br>
+          <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
+        </div>
+      `;
+
+      //Content in Overlay einfügen
+      overlayElement.innerHTML = html;
+    
+      document.getElementById("closeOverlay").addEventListener("click", e => {
+
+        e.preventDefault();
+        overlayElement.classList.add("hidden");
+        overlayElement.classList.remove("shown");
+        overlayElement.innerHTML = ""; // optional: aufräumen
+
+      });
+
+      document.getElementById(`btnReverse_${dex}`).addEventListener("click", e => {
+
+        e.preventDefault();
+        overlayElement.innerHTML = ""; // optional: aufräumen
+
+        getName(dex).then(result => {
+          const name = result.values[0].name;
+          console.log(name);
         });
-        document.getElementById('eintragsAnzahl').textContent = `(${sichtbareZeilen})`;
-      }
 
-      // Zeigt alle (auch leere) Felder an und wechselt Button
-      window.zeigeAlleFelder = function (dex) {
-        typen.forEach(type => {
-          const el = document.getElementById(`container_${type}_${dex}`);
-          if (el) el.classList.remove('versteckt');
-        });
-
-        document.getElementById(`neueKarteBtn_${dex}`)?.classList.add('versteckt');
-        document.getElementById(`abbrechenBtn_${dex}`)?.classList.remove('versteckt');
-      };
-
-      // Blendet leere Felder wieder aus und wechselt Button zurück
-      window.versteckeLeereFelder = function (dex) {
-        typen.forEach(type => {
-          const input = document.getElementById(`${type}_${dex}`);
-          const container = document.getElementById(`container_${type}_${dex}`);
-          if (input && container && !input.value.trim()) {
-            container.classList.add('versteckt');
+        fetch(`https://api.tcgdex.net/v2/de/cards?name=${encodeURIComponent(name)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
           }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data); // Hier hast du die Daten aus der API
+        })
+        .catch(error => {
+          console.error('Fehler beim Abrufen der Daten:', error);
         });
 
-        document.getElementById(`neueKarteBtn_${dex}`)?.classList.remove('versteckt');
-        document.getElementById(`abbrechenBtn_${dex}`)?.classList.add('versteckt');
-      };
-
-      // Zeigt entweder Label oder Speichern-Button je nach Eingabe
-      window.toggleSaveButton = function(type, dex) {
-        const inputId = `${type}_${dex}`;
-        const spanId = `labelOrButton_${type}_${dex}`;
-        const input = document.getElementById(inputId);
-        const span = document.getElementById(spanId);
-
-        if (!input || !span) return;
-
-        if (input.value.trim() !== "") {
-          span.innerHTML = `
-            <input class="saveButton" type="button"
-                  onclick="saveUndReset('${type}', '${dex}')"
-                  value="Speichern!">
-          `;
-        } else {
-          span.innerHTML = `<label for="${inputId}">${type.toUpperCase()}</label>`;
-        }
-      };
-
-      // Speichert den Wert und setzt das Label zurück
-      window.saveUndReset = function(type, dex) {
-        const inputId = `${type}_${dex}`;
-        const input = document.getElementById(inputId);
-        const checkmark = document.getElementById(`checkmark_${inputId}`);
+        // neues HTML für das Overlay
+        let html = `
+          <div id="overlayContent">
+            <h2>Kartenauswahl:</h2>
+            <p>Welche Karte möchtest du hinzufügen?</p>
+            <img src="https://assets.tcgdex.net/de/swsh/cel25/7/high.webp" alt="Fliegendes Pikachu VMAX">
+            <br><br>
+            <button class="overlayMenuBtn" id="btnMissing_${dex}" >Meine neue Karte ist nicht dabei.</button>
+            <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
+          </div>
+        `;
       
-        if (input) {
-          save(input, checkmark); // Bestehende Speicherfunktion
-        }
-      
-        // Nach dem Speichern zurück zum Label
-        const span = document.getElementById(`labelOrButton_${type}_${dex}`);
-        if (span) {
-          span.innerHTML = `<label for="${inputId}">${type.toUpperCase()}</label>`;
-        }
-      };
+        overlayElement.innerHTML = html;
+
+        document.getElementById("closeOverlay").addEventListener("click", e => {
+
+          e.preventDefault();
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = ""; // optional: aufräumen
+
+        });
+
+      });
+
+      //Overlay sichtbar machen
+      overlayElement.classList.remove("hidden");
+      overlayElement.classList.add("shown");
 
     }
 
+    //Filtert die Tabellen-Einträge nach Input (Dex-Nr. oder Name)
     function search() {
       let input = document.getElementById("search");
       let filter = input.value.toUpperCase();
@@ -170,10 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.search = search; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
 
-    window.showSaveButton = function (buttonToShow) {
-      buttonToShow.style.display = "inline";
-    };
-
+    //Speichert Wert in Datenbank und zeigt Checkmark als Bestätigung
     window.save = async function (inputToSave, checkmarkToShow) {
       let wert = inputToSave.value;
       const zielArray = inputToSave.name.split("_");
@@ -185,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
+        //Datenbank-Update
         await updateFeld(dex, feld, wert);
         checkmarkToShow.style.display = "inline";
         setTimeout(() => {
@@ -196,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
+    //Deklaration für Filter
     const filterZustand = {
       holo: false,
       fullart: false,
@@ -203,15 +244,16 @@ document.addEventListener("DOMContentLoaded", () => {
       rares: false
     };
     
+    //Filtert die Tabelle je nach geklicktem Filter
     function filterTabelle(filterName, felder) {
 
       const link = document.getElementById(`filter-${filterName}`);
       const isActive = filterZustand[filterName];
     
-      // Toggle Zustand
+      //Toggle Zustand
       filterZustand[filterName] = !isActive;
     
-      const rows = document.querySelectorAll('#kartentabelle tbody tr');
+      const rows = document.querySelectorAll("#kartentabelle tbody tr");
     
       rows.forEach(row => {
         let hasMatch = false;
@@ -225,31 +267,31 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     
         if (!isActive) {
-          // Erster Klick = positive Filterung → zeigen wenn etwas da ist
+          //Erster Klick = positive Filterung → zeigen wenn etwas da ist
           row.style.display = hasMatch ? "" : "none";
         } else {
-          // Zweiter Klick = negative Filterung → zeigen wenn NICHTS da ist
+          //Zweiter Klick = negative Filterung → zeigen wenn NICHTS da ist
           row.style.display = hasMatch ? "none" : "";
         }
       });
     
       // Visuelles Feedback
       // Entferne zuerst alle anderen farbigen Klassen
-      document.querySelectorAll('nav a').forEach(a => {
-        a.classList.remove('active-positive', 'active-negative');
+      document.querySelectorAll("nav a").forEach(a => {
+        a.classList.remove("active-positive", "active-negative");
       });
     
       if (!isActive) {
-        link.classList.add('active-positive');
+        link.classList.add("active-positive");
       } else {
-        link.classList.add('active-negative');
+        link.classList.add("active-negative");
       }
 
       updateEintragsAnzahl();
 
     }    
     
-    // Klick-Handler
+    // Klick-Handler für Filter
     document.getElementById("filter-holo").addEventListener("click", e => {
       e.preventDefault();
       filterTabelle("holo", ["reverse", "holo"]);
@@ -274,12 +316,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filter-alle").addEventListener("click", e => {
       e.preventDefault();
       Object.keys(filterZustand).forEach(k => filterZustand[k] = false);
-      const rows = document.querySelectorAll('#kartentabelle tbody tr');
+      const rows = document.querySelectorAll("#kartentabelle tbody tr");
       rows.forEach(row => row.style.display = "");
 
       // Farben zurücksetzen
-      document.querySelectorAll('nav a').forEach(a => {
-        a.classList.remove('active-positive', 'active-negative');
+      document.querySelectorAll("nav a").forEach(a => {
+        a.classList.remove("active-positive", "active-negative");
       });
 
       updateEintragsAnzahl();

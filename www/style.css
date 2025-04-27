@@ -118,8 +118,12 @@ th {
     text-align: center;
 }
 
-.versteckt {
+.hidden {
     display: none;
+}
+
+.shown {
+    display: flex;
 }
 
 nav a.active-positive {
@@ -128,4 +132,31 @@ nav a.active-positive {
 
 nav a.active-negative {
     color: red;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* halbtransparentes Schwarz */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Inhalt des Overlays */
+#overlayContent {
+    font-family: "Saira", sans-serif;
+    color: #DEDEDE;
+    background: #333333;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#overlay img {
+    width: 80px;
+    height: 110px;
 }

@@ -5,67 +5,70 @@
 <!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
 <html>
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pokémon TCGdex</title>
-    <meta name="description" content="Pokédex zum Organisieren der Pokémon TCG Sammelkarten">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pokémon TCGdex</title>
+        <meta name="description" content="Pokédex zum Organisieren der Pokémon TCG Sammelkarten">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Saira|Saira+Condensed">
+    </head>
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Saira|Saira+Condensed">
+    <body>
+        <!--[if lt IE 7]>
+                <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+            <![endif]-->
 
-<body>
-    <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
+        <header>
+            <h1>Pokémon TCGdex</h1>
+        </header>
 
-    <header>
-        <h1>Pokémon TCGdex</h1>
-    </header>
+        <nav>
+            <a href="#" id="filter-alle">Alle</a>
+            <a href="#" id="filter-holo">(Reverse) Holo</a>
+            <a href="#" id="filter-fullart">Full-Art</a>
+            <br>
+            <a href="#" id="filter-vfamily">V / VMAX / ex</a>
+            <a href="#" id="filter-rares">Rares</a>
+        </nav>
 
-    <nav>
-        <a href="#" id="filter-alle">Alle</a>
-        <a href="#" id="filter-holo">(Reverse) Holo</a>
-        <a href="#" id="filter-fullart">Full-Art</a>
-        <br>
-        <a href="#" id="filter-vfamily">V / VMAX / ex</a>
-        <a href="#" id="filter-rares">Rares</a>
-    </nav>
+        <article>
+            <h2>Pokédex zum Organisieren der Pokémon TCG Sammelkarten</h2>
+            <p>
+                <div class="search">
+                    <label for="search">Suche:</label>
+                    <input type="text" id="search" name="search" onkeyup="search()" placeholder="Pokédex-Nr. oder Name..">
+                </div>
+            </p>
+            <p>
+            <table id="kartentabelle">
+                <thead>
+                    <tr>
+                        <th id="th_dex">Dex-Nr.</th>
+                        <th id="th_pokemon">Pokémon<br><span id="eintragsAnzahl">(0)</span></th>
+                        <th id="th_karten">Karten</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Hier werden die Zeilen per Script eingefügt -->
+                </tbody>
+            </table>
+            </P>
+        </article>
 
-    <article>
-        <h2>Pokédex zum Organisieren der Pokémon TCG Sammelkarten</h2>
-        <p>
-            <div class="search">
-                <label for="search">Suche:</label>
-                <input type="text" id="search" name="search" onkeyup="search()" placeholder="Pokédex-Nr. oder Name..">
-            </div>
-        </p>
-        <p>
-        <table id="kartentabelle">
-            <thead>
-                <tr>
-                    <th id="th_dex">Dex-Nr.</th>
-                    <th id="th_pokemon">Pokémon<br><span id="eintragsAnzahl">(0)</span></th>
-                    <th id="th_karten">Karten</th>
-                </tr>
-            </thead>
-            <tbody>
-                 <!-- Hier werden die Zeilen per JS eingefügt -->
-            </tbody>
-        </table>
-        </P>
-    </article>
+        <div id="overlay" class="hidden">
+            <!-- Hier wird Content per Script eingefügt -->
+        </div>
 
-    <footer>
-        <p>
-            <a href="mailto:alex@kmrw.de">Kontakt</a>
-        </p>
-    </footer>
+        <footer>
+            <p>
+                <a href="mailto:alex@kmrw.de">Kontakt</a>
+            </p>
+        </footer>
 
-    <script src="build/script.js"></script>
+        <script src="build/script.js"></script>
 
-</body>
+    </body>
 
 </html>
