@@ -3,6 +3,7 @@
 h1 {
     text-align: center;
     margin-top: 75px;
+    font-size: 32px;
 }
 
 nav {
@@ -16,6 +17,7 @@ nav a {
 
 h2 {
     text-align: center;
+    font-size: 24px;
 }
 
 footer {
@@ -26,6 +28,7 @@ footer {
 
 body {
     font-family: "Saira", sans-serif;
+    font-size: 16px;
     color: #DEDEDE;
     background-color: black;
 }
@@ -165,6 +168,19 @@ nav a.active-negative {
     margin: 0 auto; /* neu */
 }
 
+#overlayContent img {
+    border-radius: 8px;
+    box-shadow: 0 0 10px #00AEFF;
+}  
+
+.overlayMenuBtn {
+    font-family: "Saira", sans-serif;
+    font-size: 16px;
+    margin-bottom: 10px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
 .kartenGrid {
     display: flex;
     flex-wrap: wrap;
@@ -178,12 +194,13 @@ nav a.active-negative {
     background: #444;
     border-radius: 8px;
     padding: 10px;
-    width: 100px;
+    width: 150px;
 }
 
 .kartenItem img {
-    width: 80px;
-    height: 110px;
+    /* Seitenverhältnis 8:11 */
+    width: 150px;
+    height: 207px;
     object-fit: cover;
 }
 

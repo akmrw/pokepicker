@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("overlay");
     
     //SQLite-Datenbank-Initialisierung
-    const { initDatabase, getDaten, updateFeld, getName } = await import("./db-init.js");
+    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds } = await import("./db-init.js");
     const db = await initDatabase();
     const data = await getDaten();
 
@@ -20,20 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let dexNr = parseInt(eintrag.dex);
 
-      if (!eintrag.reverse) { eintrag.reverse = "" }
-      if (!eintrag.holo) { eintrag.holo = "" }
-      if (!eintrag.v) { eintrag.v = "" }
-      if (!eintrag.vmax) { eintrag.vmax = "" }
-      if (!eintrag.vstar) { eintrag.vstar = "" }
-      if (!eintrag.ex) { eintrag.ex = "" }
-      if (!eintrag.shiny) { eintrag.shiny = "" }
-      if (!eintrag.fullart) { eintrag.fullart = "" }
-      if (!eintrag.rare) { eintrag.rare = "" }
-      if (!eintrag.amazing) { eintrag.amazing = "" }
-      if (!eintrag.secret) { eintrag.secret = "" }
-      if (!eintrag.hyper) { eintrag.hyper = "" }
-      if (!eintrag.custom) { eintrag.custom = "" }
-
       //Tabellenspalten mit Dex-Nr., Pokémon-Name und -Bild füllen
       let html = `
         <td class="dexnr">${eintrag.dex}</td>
@@ -42,37 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="https://www.pokewiki.de/${eintrag.name}" target="_blank">${eintrag.name}</a>
         </td>
         <td id="td_${eintrag.dex}">
-      `;
-
-      const typen = ["reverse", "holo", "v", "vmax", "vstar", "ex", "shiny", "fullart", "rare", "amazing", "secret", "hyper", "custom"];
-      let hatLeereFelder = false;
-
-      //Tabellenzeile mit vorhandenen Karten aus Datenbank füllen
-      typen.forEach(type => {
-        const value = eintrag[type];
-        const istLeer = (value === "" || value === null || value === undefined);
-        if (istLeer) hatLeereFelder = true;
-
-        html += `
-            <div class="kartenContainer ${istLeer ? "hidden" : ""}" id="container_${type}_${eintrag.dex}">
-              <input class="kartenAnzahl" type="number" readonly
-                    id="${type}_${eintrag.dex}"
-                    name="${type}_${eintrag.dex}"
-                    value="${value || ''}">
-
-              <div class="checkmark" id="checkmark_${type}_${eintrag.dex}">&#10003;</div>
-              <br>
-            </div>
-        `;
-      });
-
-      html += `
+          <div id="kartenContainer_${eintrag.dex}" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;"></div>
           <button id="neueKarteBtn_${eintrag.dex}" onclick="openOverlay('${eintrag.dex}')">+ Neue Karte</button>
         </td>
-      `
+      `;
 
       tr.innerHTML = html;
       tbody.appendChild(tr);
+
+      loadSavedCards(eintrag.dex);
       updateEintragsAnzahl();
 
     }
@@ -88,202 +52,219 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("eintragsAnzahl").textContent = `(${sichtbareZeilen})`;
     }
 
-    //Öffnet das Overlay zum Aussuchen des neuen Kartentyps nach Klick auf Button "+ Neue Karte"
-    window.openOverlay = function (dex) {
+    async function loadSavedCards(dex) {
+      const container = document.getElementById(`kartenContainer_${dex}`);
+      let cardIds = await getCardIds(dex);
+    
+      if (!cardIds) return;
+    
+      const ids = cardIds.split(";").filter(id => id.trim() !== "");
+    
+      for (const id of ids) {
+        try {
+          const response = await Http.get({
+            url: `https://api.tcgdex.net/v2/en/cards/${id}`,
+            headers: { 'Accept': 'application/json' }
+          });
+    
+          if (response.status !== 200) continue;
+    
+          const cardData = response.data;
+          const img = document.createElement("img");
+          img.src = cardData.image + "/low.webp";
+          img.alt = id;
+          img.style.width = "50px";
+          img.style.height = "69px";
+          img.style.objectFit = "cover";
 
+          img.addEventListener("click", () => openCardGallery(dex, ids.indexOf(id)));
+    
+          container.appendChild(img);
+    
+        } catch (error) {
+          console.error("Fehler beim Laden einer gespeicherten Karte:", error);
+        }
+      }
+    }
+
+    async function openCardGallery(dex, startIndex) {
       const overlayElement = document.querySelector("#overlay");
-      
-      // Vorherigen Inhalt löschen
-      overlayElement.innerHTML = "";
+      overlayElement.innerHTML = `<div id="overlayContent"><div class="loader"></div></div>`;
+      overlayElement.classList.remove("hidden");
+      overlayElement.classList.add("shown");
     
-      // HTML für Overlaycontent
-      let html = `
-        <div id="overlayContent">
-          <h2>Art der Karte</h2>
-          <p>Um was für eine Art von Karte handelt es sich?</p>
-          <button class="overlayTypBtn" id="btnReverse_${dex}">Reverse</button>
-          <button class="overlayTypBtn" id="btnHolo_${dex}">Holo</button>
-          <br>
-          <button class="overlayTypBtn" id="btnV_${dex}">V</button>
-          <button class="overlayTypBtn" id="btnVMAX_${dex}">VMAX</button>
-          <button class="overlayTypBtn" id="btnVSTAR_${dex}">VSTAR</button>
-          <button class="overlayTypBtn" id="btnEx_${dex}">ex</button>
-          <br>
-          <button class="overlayTypBtn" id="btnShiny_${dex}">Shiny</button>
-          <button class="overlayTypBtn" id="btnFullart_${dex}">Full-Art</button>
-          <br>
-          <button class="overlayTypBtn" id="btnRare_${dex}">Rare</button>
-          <button class="overlayTypBtn" id="btnAmazing_${dex}">Amazing</button>
-          <button class="overlayTypBtn" id="btnSecret_${dex}">Rainbow</button>
-          <button class="overlayTypBtn" id="btnHyper_${dex}">Gold</button>
-          <br>
-          <button class="overlayTypBtn" id="btnCustom_${dex}">Custom</button>
-          <br><br>
-          <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
-        </div>
-      `;
-
-      //Content in Overlay einfügen
-      overlayElement.innerHTML = html;
+      let cardIds = await getCardIds(dex);
+      if (!cardIds) return;
     
-      document.getElementById("closeOverlay").addEventListener("click", e => {
-
-        e.preventDefault();
+      const ids = cardIds.split(";").filter(id => id.trim() !== "");
+    
+      if (ids.length === 0) {
         overlayElement.classList.add("hidden");
         overlayElement.classList.remove("shown");
-        overlayElement.innerHTML = ""; // optional: aufräumen
-
-      });
-
-      window.zeigeKartenAuswahl = async function(dex, typ) {
-        const overlayElement = document.querySelector("#overlay");
-      
-        // Ladeanzeige
-        overlayElement.innerHTML = `
-          <div id="overlayContent">
-            <h2>Bitte warten...</h2>
-            <p>Karten werden geladen</p>
-            <div class="loader"></div>
-          </div>
-        `;
-        overlayElement.classList.remove("hidden");
-        overlayElement.classList.add("shown");
-      
+        return;
+      }
+    
+      let currentIndex = startIndex;
+    
+      async function showCard() {
+        const id = ids[currentIndex];
+    
         try {
-          const name = await getName(dex);
-          const cards = await fetchCards(name, typ);
-      
-          if (!cards || cards.length === 0) {
-            overlayElement.innerHTML = "<div id='overlayContent'><h2>Keine Karten gefunden.</h2></div>";
-            return;
-          }
-      
-          let html = `
-            <div id="overlayContent">
-              <h2>Kartenauswahl für ${typ}:</h2>
-              <p>Welche Karte möchtest du hinzufügen?</p>
-              <div class="kartenGrid">
-          `;
-      
-          cards.forEach(card => {
-            html += `
-              <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${card.name}', '${typ}')">
-                <img src="${card.image + '/low.webp'}" alt="${card.name}">
-              </div>
-            `;
+          const response = await Http.get({
+            url: `https://api.tcgdex.net/v2/en/cards/${id}`,
+            headers: { 'Accept': 'application/json' }
           });
-      
-          html += `
+    
+          if (response.status !== 200) throw new Error();
+    
+          const cardData = response.data;
+          overlayElement.innerHTML = `
+            <div id="overlayContent">
+              <h2>Karte ansehen</h2>
+              <div style="display:flex; align-items:center; justify-content:center;">
+                <button id="prevCard" style="font-size:24px;">⬅️</button>
+                <img src="${cardData.image + '/low.webp'}" alt="${id}" style="max-width:200px; max-height:300px; margin:0 20px;">
+                <button id="nextCard" style="font-size:24px;">➡️</button>
               </div>
+              <br>
+              <button id="deleteCard">❌ Karte löschen</button>
               <br><br>
-              <button class="overlayMenuBtn" id="btnMissing_${dex}">Ohne Karte fortfahren</button>
-              <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
+              <button id="closeGallery">Schließen</button>
             </div>
           `;
-      
-          overlayElement.innerHTML = html;
-      
-          document.getElementById("closeOverlay").addEventListener("click", e => {
-            e.preventDefault();
-            const overlayElement = document.querySelector("#overlay");
+    
+          document.getElementById("prevCard").addEventListener("click", () => {
+            currentIndex = (currentIndex - 1 + ids.length) % ids.length;
+            showCard();
+          });
+    
+          document.getElementById("nextCard").addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % ids.length;
+            showCard();
+          });
+    
+          document.getElementById("deleteCard").addEventListener("click", async () => {
+            if (confirm("Willst du diese Karte wirklich löschen?")) {
+              ids.splice(currentIndex, 1);
+              await updateCardIds(dex, ids.join(";") + ";");
+              overlayElement.classList.add("hidden");
+              overlayElement.classList.remove("shown");
+              overlayElement.innerHTML = "";
+              document.getElementById(`kartenContainer_${dex}`).innerHTML = "";
+              loadSavedCards(dex);
+            }
+          });
+    
+          document.getElementById("closeGallery").addEventListener("click", () => {
             overlayElement.classList.add("hidden");
             overlayElement.classList.remove("shown");
             overlayElement.innerHTML = "";
           });
-      
+    
         } catch (error) {
-          console.error(error);
-          overlayElement.innerHTML = "<div id='overlayContent'><h2>Fehler beim Laden.</h2></div>";
+          console.error("Fehler beim Anzeigen der Karte:", error);
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
         }
-      };
-      
-      document.getElementById(`btnReverse_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Reverse");
-      });
-      
-      document.getElementById(`btnHolo_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Holo");
-      });
-      
-      document.getElementById(`btnV_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "V");
-      });
-      
-      document.getElementById(`btnVMAX_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "VMAX");
-      });
-      
-      document.getElementById(`btnVSTAR_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "VSTAR");
-      });
-      
-      document.getElementById(`btnEx_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "ex");
-      });
-      
-      document.getElementById(`btnShiny_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Shiny");
-      });
-      
-      document.getElementById(`btnFullart_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Fullart");
-      });
+      }
+    
+      showCard();
+    }    
 
-      document.getElementById(`btnRare_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Rare");
-      });
+    //Öffnet das Overlay zum Aussuchen des neuen Kartentyps nach Klick auf Button "+ Neue Karte"
+    window.openOverlay = async function (dex) {
 
-      document.getElementById(`btnAmazing_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Amazing");
-      });
-
-      document.getElementById(`btnSecret_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Secret");
-      });
-
-      document.getElementById(`btnHyper_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        zeigeKartenAuswahl(dex, "Hyper");
-      });
-
-      document.getElementById(`btnCustom_${dex}`).addEventListener("click", e => {
-        e.preventDefault();
-        //GLEICH BESTÄTIGUNG ZEIGEN
-      });
-
-      //Overlay sichtbar machen
+      const overlayElement = document.querySelector("#overlay");
+      
+      // Ladeanzeige
+      overlayElement.innerHTML = `
+        <div id="overlayContent">
+          <h2>Bitte warten...</h2>
+          <p>Karten werden geladen</p>
+          <div class="loader"></div>
+        </div>
+      `;
       overlayElement.classList.remove("hidden");
       overlayElement.classList.add("shown");
-
-    }
-  
-    async function fetchCards(name, typ) {
+    
       try {
-        console.log("Starte HTTP-Anfrage für:", name);
         
-        if (typ == "Reverse") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&variants.reverse=true&image`; }
-        else if (typ == "Holo") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&variants.holo=true&image&rarity=not:Selten,%20Illustration`; }
-        else if (typ == "V") { const url = `https://api.tcgdex.net/v2/de/cards?name=eq:${name}%20V&image`; }
-        else if (typ == "VMAX") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}%20VMAX&image`; }
-        else if (typ == "VSTAR") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}%20VSTAR&image`; }
-        else if (typ == "ex") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}%20EX&image`; }
-        else if (typ == "Shiny") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Strahlend|schillernd|ultraselten`; }
-        else if (typ == "Fullart") { const url = `https://api.tcgdex.net/v2/de/cards?name=eq:${name}&image&rarity=Illustration`; }
-        else if (typ == "Rare") { const url = `https://api.tcgdex.net/v2/de/cards?name=eq:${name}&image&rarity=Selten&rarity=not:Illustration`; }
-        else if (typ == "Amazing") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Atemberaubend`; }
-        else if (typ == "Secret") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Versteckt%20Selten`; }
-        else if (typ == "Hyper") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Hyperselten`; }
+        const name = await getName(dex);
+        const engName = await getEngName(dex);
+        const cards = await fetchCards(engName);
+    
+        if (!cards || cards.length === 0) {
+          overlayElement.innerHTML = `
+            <div id='overlayContent'>
+              <h2>Keine Karten gefunden.</h2>
+              <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
+            </div>
+          `;
+
+          document.getElementById("BackBtn").addEventListener("click", e => {
+            e.preventDefault();
+            openOverlay(dex);
+          });
+
+          return;
+        }
+    
+        let html = `
+          <div id="overlayContent">
+            <h2>Kartenauswahl für ${name}:</h2>
+            <p>Welche Karte möchtest du hinzufügen?</p>
+            <div class="kartenGrid">
+        `;
+    
+        cards.forEach(card => {
+          html += `
+            <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${name}')">
+              <img src="${card.image + '/low.webp'}" alt="${name}">
+            </div>
+          `;
+        });
+    
+        html += `
+            </div>
+            <br><br>
+            <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
+          </div>
+        `;
+    
+        overlayElement.innerHTML = html;
+    
+        document.getElementById("BackBtn").addEventListener("click", e => {
+          e.preventDefault();
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+        });
+    
+      } catch (error) {
+        console.error(error);
+        overlayElement.innerHTML = `
+        <div id='overlayContent'>
+          <h2>Fehler beim Laden.</h2>
+          <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
+        </div>`;
+
+        document.getElementById("BackBtn").addEventListener("click", e => {
+          e.preventDefault();
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+        });
+
+      }
+        
+    };
+  
+    async function fetchCards(engName) {
+      
+      try {
+
+        let url = `https://api.tcgdex.net/v2/en/cards?name=${engName}&image`;
         
         const response = await Http.get({
           url: url,
@@ -293,14 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
     
-        console.log("HTTP-Antwort erhalten!");
-    
         if (response.status !== 200) {
           throw new Error(`Fehlerstatus: ${response.status}`);
         }
     
         const data = response.data; // Das fertige JSON
-        console.log("Erfolg!");
         return data;
         
       } catch (error) {
@@ -309,17 +287,48 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }   
 
-    window.karteAuswählen = function (cardId, dex, cardName, typ) {
+    window.karteAuswählen = async function (cardId, dex, name) {
+
       const overlayElement = document.querySelector("#overlay");
     
       overlayElement.innerHTML = `
         <div id="overlayContent">
           <h2>Karte hinzugefügt!</h2>
-          <p>Du hast <strong>${cardId}</strong> als <strong>${typ}</strong> ausgewählt.</p>
+          <p>Du hast <strong>${name}</strong> (${cardId}) ausgewählt.</p>
           <br>
           <button class="overlayMenuBtn" id="closeOverlayConfirm">OK</button>
         </div>
       `;
+
+      let cardIds = await getCardIds(dex);
+      if (!cardIds) { cardIds = "" }; 
+      cardIds += cardId + ";";   
+      await updateCardIds(dex, cardIds);
+
+      const container = document.getElementById(`kartenContainer_${dex}`);
+      try {
+        const response = await Http.get({
+          url: `https://api.tcgdex.net/v2/en/cards/${cardId}`,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.status === 200) {
+          const cardData = response.data;
+          const img = document.createElement("img");
+          img.src = cardData.image + "/low.webp";
+          img.alt = cardId;
+          img.style.width = "50px";
+          img.style.height = "69px";
+          img.style.objectFit = "cover";
+
+          img.addEventListener("click", async () => openCardGallery(dex, (await getCardIds(dex)).split(";").filter(id => id.trim()).indexOf(cardId)));
+
+          container.appendChild(img);
+        }
+
+      } catch (error) {
+        console.error("Fehler beim direkten Nachladen der Karte:", error);
+      }
     
       document.getElementById("closeOverlayConfirm").addEventListener("click", e => {
         e.preventDefault();
@@ -328,8 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.classList.remove("shown");
         overlayElement.innerHTML = "";
       });
-    
-      console.log(`Karte ${cardId} für Dex ${dex} als Typ ${typ} bestätigt.`);
+
     };    
 
     //Filtert die Tabellen-Einträge nach Input (Dex-Nr. oder Name)
@@ -355,30 +363,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.search = search; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
-
-    //Speichert Wert in Datenbank und zeigt Checkmark als Bestätigung
-    window.save = async function (inputToSave, checkmarkToShow) {
-      let wert = inputToSave.value;
-      const zielArray = inputToSave.name.split("_");
-      const feld = zielArray[0];
-      const dex = zielArray[1];
-
-      if (wert === "" || parseInt(wert) === 0) {
-        wert = null;
-      }
-
-      try {
-        //Datenbank-Update
-        await updateFeld(dex, feld, wert);
-        checkmarkToShow.style.display = "inline";
-        setTimeout(() => {
-          checkmarkToShow.style.display = "none";
-        }, 3000);
-      } catch (error) {
-        console.error("Fehler beim Speichern:", error);
-        alert("Speichern fehlgeschlagen.");
-      }
-    };
 
     //Deklaration für Filter
     const filterZustand = {
