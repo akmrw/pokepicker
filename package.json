@@ -28,10 +28,10 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akmrw/tcgdex.git"
+    "url": "git+https://github.com/akmrw/pokepicker.git"
   },
   "bugs": {
-    "url": "https://github.com/akmrw/tcgdex/issues"
+    "url": "https://github.com/akmrw/pokepicker/issues"
   },
-  "homepage": "https://github.com/akmrw/tcgdex#readme"
+  "homepage": "https://github.com/akmrw/pokepicker#readme"
 }
