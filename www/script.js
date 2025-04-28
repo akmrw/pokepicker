@@ -1,3 +1,5 @@
+import { Http } from '@capacitor-community/http';
+
 document.addEventListener("DOMContentLoaded", () => {
   (async () => {
 
@@ -133,53 +135,130 @@ document.addEventListener("DOMContentLoaded", () => {
 
       });
 
-      document.getElementById(`btnReverse_${dex}`).addEventListener("click", e => {
-
-        e.preventDefault();
-        overlayElement.innerHTML = ""; // optional: aufräumen
-
-        getName(dex).then(result => {
-          const name = result.values[0].name;
-          console.log(name);
-        });
-
-        fetch(`https://api.tcgdex.net/v2/de/cards?name=${encodeURIComponent(name)}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log(data); // Hier hast du die Daten aus der API
-        })
-        .catch(error => {
-          console.error('Fehler beim Abrufen der Daten:', error);
-        });
-
-        // neues HTML für das Overlay
-        let html = `
+      window.zeigeKartenAuswahl = async function(dex, typ) {
+        const overlayElement = document.querySelector("#overlay");
+      
+        // Ladeanzeige
+        overlayElement.innerHTML = `
           <div id="overlayContent">
-            <h2>Kartenauswahl:</h2>
-            <p>Welche Karte möchtest du hinzufügen?</p>
-            <img src="https://assets.tcgdex.net/de/swsh/cel25/7/high.webp" alt="Fliegendes Pikachu VMAX">
-            <br><br>
-            <button class="overlayMenuBtn" id="btnMissing_${dex}" >Meine neue Karte ist nicht dabei.</button>
-            <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
+            <h2>Bitte warten...</h2>
+            <p>Karten werden geladen</p>
+            <div class="loader"></div>
           </div>
         `;
+        overlayElement.classList.remove("hidden");
+        overlayElement.classList.add("shown");
       
-        overlayElement.innerHTML = html;
+        try {
+          const name = await getName(dex);
+          const cards = await fetchCards(name);
+      
+          if (!cards || cards.length === 0) {
+            overlayElement.innerHTML = "<div id='overlayContent'><h2>Keine Karten gefunden.</h2></div>";
+            return;
+          }
+      
+          let html = `
+            <div id="overlayContent">
+              <h2>Kartenauswahl für ${typ}:</h2>
+              <p>Welche Karte möchtest du hinzufügen?</p>
+              <div class="kartenGrid">
+          `;
+      
+          cards.forEach(card => {
+            html += `
+              <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${card.name}', '${typ}')">
+                <img src="${card.image + 'low.webp' || 'https://via.placeholder.com/80x110'}" alt="${card.name}">
+                <br>${card.name}
+              </div>
+            `;
+          });
+      
+          html += `
+              </div>
+              <br><br>
+              <button class="overlayMenuBtn" id="btnMissing_${dex}">Meine Karte ist nicht dabei</button>
+              <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
+            </div>
+          `;
+      
+          overlayElement.innerHTML = html;
+      
+          document.getElementById("closeOverlay").addEventListener("click", e => {
+            e.preventDefault();
+            overlayElement.classList.add("hidden");
+            overlayElement.innerHTML = "";
+          });
+      
+        } catch (error) {
+          console.error(error);
+          overlayElement.innerHTML = "<div id='overlayContent'><h2>Fehler beim Laden.</h2></div>";
+        }
+      };
+      
+      document.getElementById(`btnReverse_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Reverse Holo");
+      });
+      
+      document.getElementById(`btnHolo_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Holo");
+      });
+      
+      document.getElementById(`btnV_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "V");
+      });
+      
+      document.getElementById(`btnVMAX_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "VMAX");
+      });
+      
+      document.getElementById(`btnVSTAR_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "VSTAR");
+      });
+      
+      document.getElementById(`btnEx_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "ex");
+      });
+      
+      document.getElementById(`btnShiny_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Shiny");
+      });
+      
+      document.getElementById(`btnFullart_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Fullart");
+      });
 
-        document.getElementById("closeOverlay").addEventListener("click", e => {
+      document.getElementById(`btnRare_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Rare");
+      });
 
-          e.preventDefault();
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = ""; // optional: aufräumen
+      document.getElementById(`btnAmazing_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Amazing");
+      });
 
-        });
+      document.getElementById(`btnRainbow_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Rainbow");
+      });
 
+      document.getElementById(`btnGold_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Gold");
+      });
+
+      document.getElementById(`btnCustom_${dex}`).addEventListener("click", e => {
+        e.preventDefault();
+        zeigeKartenAuswahl(dex, "Custom");
       });
 
       //Overlay sichtbar machen
@@ -187,6 +266,57 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayElement.classList.add("shown");
 
     }
+  
+    async function fetchCards(name) {
+      try {
+        console.log("Starte HTTP-Anfrage für:", name);
+        
+        const url = `https://api.tcgdex.net/v2/de/cards?name=${encodeURIComponent(name)}`;
+    
+        const response = await Http.get({
+          url: url,
+          headers: {
+            'Accept': 'application/json',
+            'Connection': 'close'
+          }
+        });
+    
+        console.log("HTTP-Antwort erhalten!");
+    
+        if (response.status !== 200) {
+          throw new Error(`Fehlerstatus: ${response.status}`);
+        }
+    
+        const data = response.data; // Das fertige JSON
+        console.log("Erfolg!");
+        return data;
+        
+      } catch (error) {
+        console.error('Fehler beim Abrufen über HTTP:', error.message);
+        return null;
+      }
+    }   
+
+    window.karteAuswählen = function (cardId, dex, cardName, typ) {
+      const overlayElement = document.querySelector("#overlay");
+    
+      overlayElement.innerHTML = `
+        <div id="overlayContent">
+          <h2>Karte hinzugefügt!</h2>
+          <p>Du hast <strong>${cardName}</strong> als <strong>${typ}</strong> ausgewählt.</p>
+          <br>
+          <button class="overlayMenuBtn" id="closeOverlayConfirm">OK</button>
+        </div>
+      `;
+    
+      document.getElementById("closeOverlayConfirm").addEventListener("click", e => {
+        e.preventDefault();
+        overlayElement.classList.add("hidden");
+        overlayElement.innerHTML = "";
+      });
+    
+      console.log(`Karte ${cardId} für Dex ${dex} als Typ ${typ} bestätigt.`);
+    };    
 
     //Filtert die Tabellen-Einträge nach Input (Dex-Nr. oder Name)
     function search() {

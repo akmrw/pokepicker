@@ -1,6 +1,6 @@
-# Pokémon TCGdex
+# Poképicker
 
-## An iOS app designed to organize your Pokémon TCG cards which reminds you of the Pokédex.
+## An iOS app designed to organize your Pokémon TCG cards.
 
 ### Features from top of app to bottom
 

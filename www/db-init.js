@@ -1083,5 +1083,6 @@ export async function updateFeld(dex, feld, wert) {
 }
 
 export async function getName(dex) {
-  return await db.query(`SELECT name FROM kartendex WHERE dex = ${dex}`);
+  const result = await db.query(`SELECT name FROM kartendex WHERE dex = '${dex}'`);
+  return result.values.length > 0 ? result.values[0].name : null;
 }

@@ -1,6 +1,6 @@
 {
-  "appId": "de.kmrw.tcgdex",
-  "appName": "TCGdex",
+  "appId": "de.kmrw.pokepicker",
+  "appName": "PokéPicker",
   "webDir": "www",
   "bundledWebRuntime": false
 }
