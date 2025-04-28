@@ -26,8 +26,8 @@ export async function initDatabase() {
       fullart TEXT,
       rare TEXT,
       amazing TEXT,
-      rainbow TEXT,
-      gold TEXT,
+      secret TEXT,
+      hyper TEXT,
       custom TEXT,
       cardImages TEXT
     );

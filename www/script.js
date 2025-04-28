@@ -30,8 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!eintrag.fullart) { eintrag.fullart = "" }
       if (!eintrag.rare) { eintrag.rare = "" }
       if (!eintrag.amazing) { eintrag.amazing = "" }
-      if (!eintrag.rainbow) { eintrag.rainbow = "" }
-      if (!eintrag.gold) { eintrag.gold = "" }
+      if (!eintrag.secret) { eintrag.secret = "" }
+      if (!eintrag.hyper) { eintrag.hyper = "" }
       if (!eintrag.custom) { eintrag.custom = "" }
 
       //Tabellenspalten mit Dex-Nr., Pokémon-Name und -Bild füllen
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td id="td_${eintrag.dex}">
       `;
 
-      const typen = ["reverse", "holo", "v", "vmax", "vstar", "ex", "shiny", "fullart", "rare", "amazing", "rainbow", "gold", "custom"];
+      const typen = ["reverse", "holo", "v", "vmax", "vstar", "ex", "shiny", "fullart", "rare", "amazing", "secret", "hyper", "custom"];
       let hatLeereFelder = false;
 
       //Tabellenzeile mit vorhandenen Karten aus Datenbank füllen
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div id="overlayContent">
           <h2>Art der Karte</h2>
           <p>Um was für eine Art von Karte handelt es sich?</p>
-          <button class="overlayTypBtn" id="btnReverse_${dex}">Reverse Holo</button>
+          <button class="overlayTypBtn" id="btnReverse_${dex}">Reverse</button>
           <button class="overlayTypBtn" id="btnHolo_${dex}">Holo</button>
           <br>
           <button class="overlayTypBtn" id="btnV_${dex}">V</button>
@@ -114,8 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <br>
           <button class="overlayTypBtn" id="btnRare_${dex}">Rare</button>
           <button class="overlayTypBtn" id="btnAmazing_${dex}">Amazing</button>
-          <button class="overlayTypBtn" id="btnRainbow_${dex}">Rainbow</button>
-          <button class="overlayTypBtn" id="btnGold_${dex}">Gold</button>
+          <button class="overlayTypBtn" id="btnSecret_${dex}">Rainbow</button>
+          <button class="overlayTypBtn" id="btnHyper_${dex}">Gold</button>
           <br>
           <button class="overlayTypBtn" id="btnCustom_${dex}">Custom</button>
           <br><br>
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
         try {
           const name = await getName(dex);
-          const cards = await fetchCards(name);
+          const cards = await fetchCards(name, typ);
       
           if (!cards || cards.length === 0) {
             overlayElement.innerHTML = "<div id='overlayContent'><h2>Keine Karten gefunden.</h2></div>";
@@ -168,8 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
           cards.forEach(card => {
             html += `
               <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${card.name}', '${typ}')">
-                <img src="${card.image + 'low.webp' || 'https://via.placeholder.com/80x110'}" alt="${card.name}">
-                <br>${card.name}
+                <img src="${card.image + '/low.webp'}" alt="${card.name}">
               </div>
             `;
           });
@@ -177,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
           html += `
               </div>
               <br><br>
-              <button class="overlayMenuBtn" id="btnMissing_${dex}">Meine Karte ist nicht dabei</button>
+              <button class="overlayMenuBtn" id="btnMissing_${dex}">Ohne Karte fortfahren</button>
               <button class="overlayMenuBtn" id="closeOverlay">Abbrechen</button>
             </div>
           `;
@@ -186,7 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
       
           document.getElementById("closeOverlay").addEventListener("click", e => {
             e.preventDefault();
+            const overlayElement = document.querySelector("#overlay");
             overlayElement.classList.add("hidden");
+            overlayElement.classList.remove("shown");
             overlayElement.innerHTML = "";
           });
       
@@ -198,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       document.getElementById(`btnReverse_${dex}`).addEventListener("click", e => {
         e.preventDefault();
-        zeigeKartenAuswahl(dex, "Reverse Holo");
+        zeigeKartenAuswahl(dex, "Reverse");
       });
       
       document.getElementById(`btnHolo_${dex}`).addEventListener("click", e => {
@@ -246,19 +247,19 @@ document.addEventListener("DOMContentLoaded", () => {
         zeigeKartenAuswahl(dex, "Amazing");
       });
 
-      document.getElementById(`btnRainbow_${dex}`).addEventListener("click", e => {
+      document.getElementById(`btnSecret_${dex}`).addEventListener("click", e => {
         e.preventDefault();
-        zeigeKartenAuswahl(dex, "Rainbow");
+        zeigeKartenAuswahl(dex, "Secret");
       });
 
-      document.getElementById(`btnGold_${dex}`).addEventListener("click", e => {
+      document.getElementById(`btnHyper_${dex}`).addEventListener("click", e => {
         e.preventDefault();
-        zeigeKartenAuswahl(dex, "Gold");
+        zeigeKartenAuswahl(dex, "Hyper");
       });
 
       document.getElementById(`btnCustom_${dex}`).addEventListener("click", e => {
         e.preventDefault();
-        zeigeKartenAuswahl(dex, "Custom");
+        //GLEICH BESTÄTIGUNG ZEIGEN
       });
 
       //Overlay sichtbar machen
@@ -267,12 +268,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
   
-    async function fetchCards(name) {
+    async function fetchCards(name, typ) {
       try {
         console.log("Starte HTTP-Anfrage für:", name);
         
-        const url = `https://api.tcgdex.net/v2/de/cards?name=${encodeURIComponent(name)}`;
-    
+        if (typ == "Reverse") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&variants.reverse=true&image`; }
+        else if (typ == "Holo") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&variants.holo=true&image&rarity=not:Selten,%20Illustration`; }
+        else if (typ == "V") { const url = `https://api.tcgdex.net/v2/de/cards?name=eq:${name}%20V&image`; }
+        else if (typ == "VMAX") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}%20VMAX&image`; }
+        else if (typ == "VSTAR") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}%20VSTAR&image`; }
+        else if (typ == "ex") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}%20EX&image`; }
+        else if (typ == "Shiny") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Strahlend|schillernd|ultraselten`; }
+        else if (typ == "Fullart") { const url = `https://api.tcgdex.net/v2/de/cards?name=eq:${name}&image&rarity=Illustration`; }
+        else if (typ == "Rare") { const url = `https://api.tcgdex.net/v2/de/cards?name=eq:${name}&image&rarity=Selten&rarity=not:Illustration`; }
+        else if (typ == "Amazing") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Atemberaubend`; }
+        else if (typ == "Secret") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Versteckt%20Selten`; }
+        else if (typ == "Hyper") { const url = `https://api.tcgdex.net/v2/de/cards?name=${name}&image&rarity=Hyperselten`; }
+        
         const response = await Http.get({
           url: url,
           headers: {
@@ -303,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayElement.innerHTML = `
         <div id="overlayContent">
           <h2>Karte hinzugefügt!</h2>
-          <p>Du hast <strong>${cardName}</strong> als <strong>${typ}</strong> ausgewählt.</p>
+          <p>Du hast <strong>${cardId}</strong> als <strong>${typ}</strong> ausgewählt.</p>
           <br>
           <button class="overlayMenuBtn" id="closeOverlayConfirm">OK</button>
         </div>
@@ -311,7 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
       document.getElementById("closeOverlayConfirm").addEventListener("click", e => {
         e.preventDefault();
+        const overlayElement = document.querySelector("#overlay");
         overlayElement.classList.add("hidden");
+        overlayElement.classList.remove("shown");
         overlayElement.innerHTML = "";
       });
     
@@ -439,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.getElementById("filter-rares").addEventListener("click", e => {
       e.preventDefault();
-      filterTabelle("rares", ["shiny", "rare", "amazing", "rainbow", "gold"]);
+      filterTabelle("rares", ["shiny", "rare", "amazing", "secret", "hyper"]);
     });
     
     // "Alle" zeigt wieder alle Zeilen an
