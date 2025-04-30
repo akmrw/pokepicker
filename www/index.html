@@ -21,24 +21,21 @@
             <![endif]-->
 
         <header>
-            <h1>PokéPicker</h1>
+            <img src="pokepicker_logo_transparent.png" alt="PokéPicker">
         </header>
 
-        <!--<nav>
+        <nav>
             <a href="#" id="filter-alle">Alle</a>
-            <a href="#" id="filter-holo">(Reverse) Holo</a>
-            <a href="#" id="filter-fullart">Full-Art</a>
-            <br>
-            <a href="#" id="filter-vfamily">V / VMAX / ex</a>
-            <a href="#" id="filter-rares">Rares</a>
-        </nav>-->
+            <a href="#" id="filter-reverse">Reverse</a>
+            <a href="#" id="filter-holo">Holo</a>
+        </nav>
 
         <article>
             <h2>Organisiere deine Pokémon TCG Sammelkarten</h2>
             <p>
                 <div class="search">
                     <label for="search">Suche:</label>
-                    <input type="text" id="search" name="search" onkeyup="search()" placeholder="Pokédex-Nr. oder Name..">
+                    <input type="text" id="search" name="search" onkeyup="searchTable()" placeholder="Pokédex-Nr. oder Name..">
                 </div>
             </p>
             <p>
@@ -47,7 +44,7 @@
                     <tr>
                         <th id="th_dex">Dex-Nr.</th>
                         <th id="th_pokemon">Pokémon<br><span id="eintragsAnzahl">(0)</span></th>
-                        <th id="th_karten">Karten</th>
+                        <th id="th_karten">Karten<br><span id="kartenAnzahl">(0)</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,7 +64,7 @@
             </p>
         </footer>
 
-        <script src="build/script.js"></script>
+        <script type="module" src="build/script.js"></script>
 
     </body>
 

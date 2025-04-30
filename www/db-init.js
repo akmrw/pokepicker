@@ -4,15 +4,16 @@ const sqlite = new SQLiteConnection(CapacitorSQLite);
 let db;
 
 export async function initDatabase() {
-  db = await sqlite.createConnection("tcgdex", false, "no-encryption", 1);
+  db = await sqlite.createConnection("pokepicker", false, "no-encryption", 1);
   await db.open();
 
-  //Tabelle löschen, falls vorhanden (NUR FÜR DEVENV, NICHT PROD)
-  //await db.execute(`DROP TABLE IF EXISTS kartendex`);
+  //Tabellen löschen, falls vorhanden (NUR FÜR DEVENV, NICHT PROD)
+  //await db.execute(`DROP TABLE IF EXISTS pokemon`);
+  //await db.execute(`DROP TABLE IF EXISTS cards`);
 
   //Tabelle anlegen
   await db.execute(`
-    CREATE TABLE IF NOT EXISTS kartendex (
+    CREATE TABLE IF NOT EXISTS pokemon (
       id INTEGER PRIMARY KEY,
       dex TEXT,
       name TEXT,
@@ -21,14 +22,31 @@ export async function initDatabase() {
     );
   `);
 
-  const result = await db.query("SELECT COUNT(*) as count FROM kartendex");
+  // Optimierte cards-Tabelle mit UNIQUE auf cardId
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS cards (
+      id INTEGER PRIMARY KEY,
+      cardId TEXT,
+      rarity TEXT,
+      setName TEXT,
+      variants TEXT,
+      basic INTEGER DEFAULT 0,
+      reverse INTEGER DEFAULT 0,
+      holo INTEGER DEFAULT 0,
+      addedAt TEXT,
+      imageLow BLOB,
+      imageHigh BLOB
+    );
+  `);
+
+  const result = await db.query("SELECT COUNT(*) as count FROM pokemon");
   const anzahl = result.values[0].count;
 
   if (anzahl === 0) {
     
     //wenn noch keine Zeilen vorhanden sind INSERT ausführen
     await db.execute(`
-      INSERT INTO kartendex (id, dex, name, engName)
+      INSERT INTO pokemon (id, dex, name, engName)
       VALUES
         (1, "0001", "Bisasam", "Bulbasaur"),
         (2, "0002", "Bisaknosp", "Ivysaur"),
@@ -1062,25 +1080,83 @@ export async function initDatabase() {
 
 }
 
+
 export async function getDaten() {
-  return await db.query("SELECT * FROM kartendex");
+  return await db.query("SELECT * FROM pokemon");
 }
 
 export async function getName(dex) {
-  const result = await db.query(`SELECT name FROM kartendex WHERE dex = '${dex}'`);
-  return result.values.length > 0 ? result.values[0].name : null;
+  const result = await db.query("SELECT name FROM pokemon WHERE dex = ?", [dex]);
+  return result.values[0].name;
 }
 
 export async function getEngName(dex) {
-  const result = await db.query(`SELECT engName FROM kartendex WHERE dex = '${dex}'`);
-  return result.values.length > 0 ? result.values[0].engName : null;
+  const result = await db.query("SELECT engName FROM pokemon WHERE dex = ?", [dex]);
+  return result.values[0].engName;
 }
 
 export async function getCardIds(dex) {
-  const result = await db.query(`SELECT cardIds FROM kartendex WHERE dex = '${dex}'`);
-  return result.values.length > 0 ? result.values[0].cardIds : null;
+  const result = await db.query("SELECT cardIds FROM pokemon WHERE dex = ?", [dex]);
+  return result.values[0].cardIds;
 }
 
 export async function updateCardIds(dex, cardIds) {
-  return await db.run(`UPDATE kartendex SET cardIds = '${cardIds}' WHERE dex = '${dex}'`);
+  await db.run("UPDATE pokemon SET cardIds = ? WHERE dex = ?", [cardIds, dex]);
+}
+
+export async function insertCard(cardData) {
+  const rarity = cardData.rarity || "Unbekannt";
+  const setName = (cardData.set && cardData.set.name) ? cardData.set.name : "Unbekannt";
+  const addedAt = new Date().toISOString(); // Jetzt aktuelles Datum erzeugen
+
+  const lowBlob = await fetchImageAsBlob(cardData.image + "/low.webp");
+  const highBlob = await fetchImageAsBlob(cardData.image + "/high.webp");
+
+  try {
+    await db.run(
+      "INSERT INTO cards (cardId, rarity, setName, basic, reverse, holo, addedAt, imageLow, imageHigh) VALUES (?, ?, ?, 0, 0, 0, ?, ?, ?)",
+      [cardData.id, rarity, setName, addedAt, lowBlob, highBlob]
+    );
+
+    const idResult = await db.query("SELECT last_insert_rowid() AS id");
+    return idResult.values[0].id;
+
+  } catch (e) {
+    console.error("Fehler beim Einfügen der Karte:", e);
+    return null;
+  }
+}
+
+export async function getCardById(id) {
+  const result = await db.query("SELECT * FROM cards WHERE id = ?", [id]);
+  if (result.values.length === 0) return null;
+
+  const card = result.values[0];
+  
+  if (card.imageLow && !(card.imageLow instanceof Blob)) {
+    card.imageLow = new Blob([new Uint8Array(card.imageLow)], { type: 'image/webp' });
+  }
+  if (card.imageHigh && !(card.imageHigh instanceof Blob)) {
+    card.imageHigh = new Blob([new Uint8Array(card.imageHigh)], { type: 'image/webp' });
+  }  
+
+  return card;
+}
+
+async function fetchImageAsBlob(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Image download failed');
+  return await response.blob();
+}
+
+export async function getCardsByIds(ids) {
+  const placeholders = ids.map(() => '?').join(',');
+  const result = await db.query(`SELECT * FROM cards WHERE id IN (${placeholders})`, ids);
+
+  return result.values.map(card => {
+    if (card.imageLow && !(card.imageLow instanceof Blob)) {
+      card.imageLow = new Blob([new Uint8Array(card.imageLow)], { type: 'image/webp' });
+    }
+    return card;
+  });
 }

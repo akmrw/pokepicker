@@ -1,9 +1,13 @@
 /* Seitenstruktur */
 
-h1 {
-    text-align: center;
+header {
     margin-top: 75px;
-    font-size: 32px;
+    text-align: center;
+}
+
+header img {
+    text-align: center;
+    max-height: 100px;
 }
 
 nav {
@@ -223,3 +227,38 @@ nav a.active-negative {
         transform: rotate(360deg);
     }
 }
+
+button.closeGallery {
+    position: absolute;
+    top: 110px;
+    right: 20px;
+    font-size: 24px;
+    background: none;
+    color: #DEDEDE;
+    border: none;
+    cursor: pointer;
+}
+
+#progressBarContainer {
+    width: 100%;
+    max-width: 400px;
+    height: 20px;
+    background-color: #555;
+    border-radius: 10px;
+    margin: 20px auto 10px;
+    overflow: hidden;
+  }
+  
+  #progressBar {
+    height: 100%;
+    width: 0%;
+    background-color: #00AEFF;
+    transition: width 0.3s ease;
+  }
+  
+  #progressText {
+    text-align: center;
+    font-size: 16px;
+    margin-top: 0;
+  }
+  

@@ -1,18 +1,34 @@
 import { Http } from '@capacitor-community/http';
+let db;
 
 document.addEventListener("DOMContentLoaded", () => {
   (async () => {
 
-    //Overlays definieren
     const overlay = document.getElementById("overlay");
+    overlay.innerHTML = `
+      <div id="overlayContent">
+        <h2>Karten werden geladen…</h2>
+        <div class="loader"></div>
+        <div id="progressBarContainer">
+          <div id="progressBar"></div>
+        </div>
+        <p id="progressText">0%</p>
+      </div>
+    `;
+    overlay.classList.remove("hidden");
+    overlay.classList.add("shown");
     
     //SQLite-Datenbank-Initialisierung
-    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds } = await import("./db-init.js");
-    const db = await initDatabase();
-    const data = await getDaten();
+    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds, insertCard, getCardById, getCardsByIds } = await import("./db-init.js");
+    db = await initDatabase();
 
     //Tabelle definieren
+    const data = await getDaten();
     const tbody = document.querySelector("#kartentabelle tbody");
+
+    window.cachedCards = {};
+    let current = 0;
+    const total = data.values.length;
 
     //Tabelle aus Datenbank füllen
     for (const eintrag of data.values) {
@@ -36,10 +52,24 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = html;
       tbody.appendChild(tr);
 
-      loadSavedCards(eintrag.dex);
-      updateEintragsAnzahl();
+      await loadSavedCards(eintrag.dex);
 
-    }
+      // Fortschritt berechnen
+      current++;
+      const percent = Math.round((current / total) * 100);
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      if (progressBar) progressBar.style.width = percent + "%";
+      if (progressText) progressText.textContent = percent + "%";
+
+    } 
+
+    updateEintragsAnzahl();
+    updateKartenAnzahl();
+
+    overlay.classList.add("hidden");
+    overlay.classList.remove("shown");
+    overlay.innerHTML = "";
 
     //Aktualisieren der gezeigten Anzahl der Tabellen-Einträge
     function updateEintragsAnzahl() {
@@ -52,39 +82,47 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("eintragsAnzahl").textContent = `(${sichtbareZeilen})`;
     }
 
-    async function loadSavedCards(dex) {
-      const container = document.getElementById(`kartenContainer_${dex}`);
-      let cardIds = await getCardIds(dex);
+    function updateKartenAnzahl() {
+      const rows = document.querySelectorAll("#kartentabelle tbody tr");
+      let gesamt = 0;
     
+      rows.forEach(row => {
+        if (row.style.display === "none") return;
+    
+        const cards = row.querySelectorAll("div[id^='kartenContainer_'] img");
+        gesamt += cards.length;
+      });
+    
+      document.getElementById("kartenAnzahl").textContent = `(${gesamt})`;
+    }    
+
+    async function loadSavedCards(dex) {
+      
+      const container = document.getElementById(`kartenContainer_${dex}`);
+      
+      let cardIds = await getCardIds(dex);
       if (!cardIds) return;
     
-      const ids = cardIds.split(";").filter(id => id.trim() !== "");
-    
-      for (const id of ids) {
-        try {
-          const response = await Http.get({
-            url: `https://api.tcgdex.net/v2/en/cards/${id}`,
-            headers: { 'Accept': 'application/json' }
-          });
-    
-          if (response.status !== 200) continue;
-    
-          const cardData = response.data;
-          const img = document.createElement("img");
-          img.src = cardData.image + "/low.webp";
-          img.alt = id;
-          img.style.width = "50px";
-          img.style.height = "69px";
-          img.style.objectFit = "cover";
+      const ids = cardIds.split(";").filter(id => id.trim());
+      const cards = await getCardsByIds(ids.map(id => parseInt(id)));
+      const fragment = document.createDocumentFragment();
 
-          img.addEventListener("click", () => openCardGallery(dex, ids.indexOf(id)));
-    
-          container.appendChild(img);
-    
-        } catch (error) {
-          console.error("Fehler beim Laden einer gespeicherten Karte:", error);
-        }
+      for (const card of cards) {
+        window.cachedCards[card.cardId] = card;
+
+        const img = document.createElement("img");
+        img.alt = card.cardId;
+        img.style.width = "50px";
+        img.style.height = "69px";
+        img.style.objectFit = "cover";
+        img.src = URL.createObjectURL(card.imageLow);
+
+        img.addEventListener("click", () => openCardGallery(dex, ids.indexOf(String(card.id))));
+        fragment.appendChild(img);
       }
+
+      container.appendChild(fragment);
+
     }
 
     async function openCardGallery(dex, startIndex) {
@@ -107,31 +145,53 @@ document.addEventListener("DOMContentLoaded", () => {
       let currentIndex = startIndex;
     
       async function showCard() {
+        
         const id = ids[currentIndex];
     
         try {
-          const response = await Http.get({
-            url: `https://api.tcgdex.net/v2/en/cards/${id}`,
-            headers: { 'Accept': 'application/json' }
-          });
-    
-          if (response.status !== 200) throw new Error();
-    
-          const cardData = response.data;
+          const card = await getCardById(id);
+
+          let hinzugefügtAm = "Unbekannt";
+          if (card.addedAt) {
+            const datum = new Date(card.addedAt);
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            //const options = { day: '2-digit', month: '2-digit', year: 'numeric' }; // nur Datum, ohne Zeit
+            hinzugefügtAm = datum.toLocaleString('de-DE', options);
+          }
+
+          let variante = "Keine Angabe";
+
+          if (card.basic == 1) variante = "Basic";
+          if (card.reverse == 1) variante = "Reverse";
+          if (card.holo == 1) variante = "Holo";
+
           overlayElement.innerHTML = `
             <div id="overlayContent">
+            <button class="closeGallery" id="closeGallery">X</button>
               <h2>Karte ansehen</h2>
               <div style="display:flex; align-items:center; justify-content:center;">
-                <button id="prevCard" style="font-size:24px;">⬅️</button>
-                <img src="${cardData.image + '/low.webp'}" alt="${id}" style="max-width:200px; max-height:300px; margin:0 20px;">
-                <button id="nextCard" style="font-size:24px;">➡️</button>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                  <img id="cardImage" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
+                  <p style="margin-top:10px;">
+                    Variante: <strong>${variante}</strong><br>
+                    Hinzugefügt am: <strong>${hinzugefügtAm}
+                  </p>
+                </div>
               </div>
-              <br>
-              <button id="deleteCard">❌ Karte löschen</button>
+              <button id="prevCard" style="font-size:24px;">⬅️</button>
+              <button id="nextCard" style="font-size:24px;">➡️</button>
               <br><br>
-              <button id="closeGallery">Schließen</button>
+              <button id="deleteCard">❌ Karte löschen</button>
             </div>
           `;
+
+          if (card.imageHigh) {
+            const highUrl = URL.createObjectURL(card.imageHigh);
+            document.getElementById("cardImage").src = highUrl;
+          } else {
+            console.warn("Kein imageHigh vorhanden für Karte:", card.cardId);
+            document.getElementById("cardImage").alt = "Kein Bild vorhanden";
+          }          
     
           document.getElementById("prevCard").addEventListener("click", () => {
             currentIndex = (currentIndex - 1 + ids.length) % ids.length;
@@ -197,14 +257,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cards || cards.length === 0) {
           overlayElement.innerHTML = `
             <div id='overlayContent'>
-              <h2>Keine Karten gefunden.</h2>
+              <h2>Keine Karten gefunden.</h2> 
               <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
             </div>
           `;
 
           document.getElementById("BackBtn").addEventListener("click", e => {
             e.preventDefault();
-            openOverlay(dex);
+            overlayElement.classList.add("hidden");
+            overlayElement.classList.remove("shown");
+            overlayElement.innerHTML = "";
           });
 
           return;
@@ -264,7 +326,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       try {
 
-        let url = `https://api.tcgdex.net/v2/en/cards?name=${engName}&image`;
+        if (engName == "Marill") { engName = "Marill&name=not:Azumarill"};
+        if (engName == "Mew") { engName = "Mew&name=not:Mewtwo"};
+
+        let url = `https://api.tcgdex.net/v2/en/cards?name=${engName}&image=not:tcgp`;
         
         const response = await Http.get({
           url: url,
@@ -291,57 +356,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const overlayElement = document.querySelector("#overlay");
     
+      const response = await Http.get({
+        url: `https://api.tcgdex.net/v2/en/cards/${cardId}`,
+        headers: { 'Accept': 'application/json' }
+      });
+    
+      if (response.status !== 200) return;
+    
+      const cardData = response.data;
+      const cardDbId = await insertCard(cardData);
+      if (!cardDbId) {
+        console.error("Keine ID von insertCard erhalten – Abbruch.");
+        return;
+      }
+
+      // Bilder herunterladen und speichern
+      async function blobToUint8Array(blob) {
+        const arrayBuffer = await blob.arrayBuffer();
+        return new Uint8Array(arrayBuffer);
+      }
+
+      const lowBlob = await fetch(cardData.image + "/low.webp").then(r => r.blob());
+      const highBlob = await fetch(cardData.image + "/high.webp").then(r => r.blob());
+
+      const lowArray = await blobToUint8Array(lowBlob);
+      const highArray = await blobToUint8Array(highBlob);
+
+      await db.run(
+        "UPDATE cards SET imageLow = ?, imageHigh = ? WHERE id = ?",
+        [lowArray, highArray, cardDbId]
+      );
+    
       overlayElement.innerHTML = `
         <div id="overlayContent">
           <h2>Karte hinzugefügt!</h2>
           <p>Du hast <strong>${name}</strong> (${cardId}) ausgewählt.</p>
           <br>
+          <button class="overlayMenuBtn" id="btnBasic">Basic</button>
+          <button class="overlayMenuBtn" id="btnReverse">Reverse</button>
+          <button class="overlayMenuBtn" id="btnHolo">Holo</button>
+          <br><br>
           <button class="overlayMenuBtn" id="closeOverlayConfirm">OK</button>
         </div>
       `;
-
-      let cardIds = await getCardIds(dex);
-      if (!cardIds) { cardIds = "" }; 
-      cardIds += cardId + ";";   
-      await updateCardIds(dex, cardIds);
-
-      const container = document.getElementById(`kartenContainer_${dex}`);
-      try {
-        const response = await Http.get({
-          url: `https://api.tcgdex.net/v2/en/cards/${cardId}`,
-          headers: { 'Accept': 'application/json' }
-        });
-
-        if (response.status === 200) {
-          const cardData = response.data;
-          const img = document.createElement("img");
-          img.src = cardData.image + "/low.webp";
-          img.alt = cardId;
-          img.style.width = "50px";
-          img.style.height = "69px";
-          img.style.objectFit = "cover";
-
-          img.addEventListener("click", async () => openCardGallery(dex, (await getCardIds(dex)).split(";").filter(id => id.trim()).indexOf(cardId)));
-
-          container.appendChild(img);
-        }
-
-      } catch (error) {
-        console.error("Fehler beim direkten Nachladen der Karte:", error);
-      }
     
-      document.getElementById("closeOverlayConfirm").addEventListener("click", e => {
-        e.preventDefault();
-        const overlayElement = document.querySelector("#overlay");
+      async function finalizeCardSelection(variantType) {
+
+        if (variantType !== "none") {
+          await db.run(`UPDATE cards SET ${variantType} = 1 WHERE id = ?`, [cardDbId]);
+        }
+    
+        let cardIds = await getCardIds(dex);
+        if (!cardIds) cardIds = "";
+        cardIds += cardDbId + ";";
+        await updateCardIds(dex, cardIds);
+    
+        const container = document.getElementById(`kartenContainer_${dex}`);
+        const img = document.createElement("img");
+        img.src = cardData.image + "/low.webp";
+        img.alt = cardId;
+        img.style.width = "50px";
+        img.style.height = "69px";
+        img.style.objectFit = "cover";
+    
+        img.addEventListener("click", async () => {
+          const ids = (await getCardIds(dex)).split(";").filter(id => id.trim());
+          openCardGallery(dex, ids.indexOf(cardDbId.toString()));
+        });
+    
+        container.appendChild(img);
+    
         overlayElement.classList.add("hidden");
         overlayElement.classList.remove("shown");
         overlayElement.innerHTML = "";
-      });
-
+      }
+    
+      document.getElementById("btnBasic").addEventListener("click", () => finalizeCardSelection("basic"));
+      document.getElementById("btnReverse").addEventListener("click", () => finalizeCardSelection("reverse"));
+      document.getElementById("btnHolo").addEventListener("click", () => finalizeCardSelection("holo"));
+      document.getElementById("closeOverlayConfirm").addEventListener("click", () => finalizeCardSelection("none"));
+      
     };    
 
     //Filtert die Tabellen-Einträge nach Input (Dex-Nr. oder Name)
-    function search() {
+    function searchTable() {
       let input = document.getElementById("search");
       let filter = input.value.toUpperCase();
       let table = document.getElementById("kartentabelle");
@@ -360,9 +458,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       updateEintragsAnzahl();
+      updateKartenAnzahl();
     }
 
-    window.search = search; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
+    window.searchTable = searchTable; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
 
     //Deklaration für Filter
     const filterZustand = {
@@ -372,89 +471,96 @@ document.addEventListener("DOMContentLoaded", () => {
       rares: false
     };
     
-    //Filtert die Tabelle je nach geklicktem Filter
-    function filterTabelle(filterName, felder) {
+    const filterStates = {
+      reverse: "neutral", // kann sein: "neutral", "positive", "negative"
+      holo: "neutral"
+    };
 
-      const link = document.getElementById(`filter-${filterName}`);
-      const isActive = filterZustand[filterName];
-    
-      //Toggle Zustand
-      filterZustand[filterName] = !isActive;
-    
+    function applyFilter() {
       const rows = document.querySelectorAll("#kartentabelle tbody tr");
     
       rows.forEach(row => {
-        let hasMatch = false;
+        const container = row.querySelector("div[id^='kartenContainer_']");
+        const cards = container.querySelectorAll("img");
     
-        felder.forEach(feld => {
-          const input = row.querySelector(`input[id^="${feld}_"]`);
-          const val = input?.value?.trim();
-          if (val && val !== "0") {
-            hasMatch = true;
-          }
+        let hasReverse = false;
+        let hasHolo = false;
+    
+        cards.forEach(img => {
+          const cardId = img.alt;
+          const card = window.cachedCards?.[cardId];
+          if (!card) return;
+    
+          if (card.reverse == 1) hasReverse = true;
+          if (card.holo == 1) hasHolo = true;
         });
     
-        if (!isActive) {
-          //Erster Klick = positive Filterung → zeigen wenn etwas da ist
-          row.style.display = hasMatch ? "" : "none";
-        } else {
-          //Zweiter Klick = negative Filterung → zeigen wenn NICHTS da ist
-          row.style.display = hasMatch ? "none" : "";
-        }
+        let show = true;
+    
+        // Reverse-Filter prüfen
+        if (filterStates.reverse === "positive" && !hasReverse) show = false;
+        if (filterStates.reverse === "negative" && hasReverse) show = false;
+    
+        // Holo-Filter prüfen
+        if (filterStates.holo === "positive" && !hasHolo) show = false;
+        if (filterStates.holo === "negative" && hasHolo) show = false;
+    
+        row.style.display = show ? "" : "none";
       });
     
-      // Visuelles Feedback
-      // Entferne zuerst alle anderen farbigen Klassen
-      document.querySelectorAll("nav a").forEach(a => {
-        a.classList.remove("active-positive", "active-negative");
-      });
+      updateEintragsAnzahl();
+      updateKartenAnzahl();
+    }
     
-      if (!isActive) {
-        link.classList.add("active-positive");
+    function toggleFilter(type) {
+      // Toggle durch die drei Zustände
+      if (filterStates[type] === "neutral") {
+        filterStates[type] = "positive";
+      } else if (filterStates[type] === "positive") {
+        filterStates[type] = "negative";
       } else {
-        link.classList.add("active-negative");
+        filterStates[type] = "neutral";
       }
-
-      updateEintragsAnzahl();
-
-    }    
     
-    // Klick-Handler für Filter
-    document.getElementById("filter-holo").addEventListener("click", e => {
+      applyFilter();
+      updateNavStyles();
+    }
+
+    function updateNavStyles() {
+      const reverseBtn = document.getElementById("filter-reverse");
+      const holoBtn = document.getElementById("filter-holo");
+    
+      reverseBtn.className = filterStates.reverse === "positive"
+        ? "active-positive"
+        : filterStates.reverse === "negative"
+        ? "active-negative"
+        : "";
+    
+      holoBtn.className = filterStates.holo === "positive"
+        ? "active-positive"
+        : filterStates.holo === "negative"
+        ? "active-negative"
+        : "";
+    }
+
+    document.getElementById("filter-alle").addEventListener("click", (e) => {
       e.preventDefault();
-      filterTabelle("holo", ["reverse", "holo"]);
+      filterStates.reverse = "neutral";
+      filterStates.holo = "neutral";
+      applyFilter();
+      updateNavStyles();
     });
     
-    document.getElementById("filter-fullart").addEventListener("click", e => {
+    document.getElementById("filter-reverse").addEventListener("click", (e) => {
       e.preventDefault();
-      filterTabelle("fullart", ["fullart"]);
+      toggleFilter("reverse");
     });
     
-    document.getElementById("filter-vfamily").addEventListener("click", e => {
+    document.getElementById("filter-holo").addEventListener("click", (e) => {
       e.preventDefault();
-      filterTabelle("vfamily", ["v", "vmax", "vstar", "ex"]);
+      toggleFilter("holo");
     });
     
-    document.getElementById("filter-rares").addEventListener("click", e => {
-      e.preventDefault();
-      filterTabelle("rares", ["shiny", "rare", "amazing", "secret", "hyper"]);
-    });
-    
-    // "Alle" zeigt wieder alle Zeilen an
-    document.getElementById("filter-alle").addEventListener("click", e => {
-      e.preventDefault();
-      Object.keys(filterZustand).forEach(k => filterZustand[k] = false);
-      const rows = document.querySelectorAll("#kartentabelle tbody tr");
-      rows.forEach(row => row.style.display = "");
-
-      // Farben zurücksetzen
-      document.querySelectorAll("nav a").forEach(a => {
-        a.classList.remove("active-positive", "active-negative");
-      });
-
-      updateEintragsAnzahl();
-
-    });
 
   })();
 });
