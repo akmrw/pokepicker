@@ -26,6 +26,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await getDaten();
     const tbody = document.querySelector("#kartentabelle tbody");
 
+    /* async function updateCardNameForExistingCards() {
+      const { values: cards } = await db.query("SELECT id, cardId FROM cards WHERE cardName IS NULL OR cardName = ''");
+    
+      for (const card of cards) {
+        try {
+          const response = await Http.get({
+            url: `https://api.tcgdex.net/v2/en/cards/${card.cardId}`,
+            headers: { 'Accept': 'application/json' }
+          });
+    
+          if (response.status !== 200 || !response.data) {
+            console.warn(`Keine Daten für Karte ${card.cardId}`);
+            continue;
+          }
+    
+          const cardName = response.data.name || null;
+          await db.run(`UPDATE cards SET cardName = ? WHERE id = ?`, [cardName, card.id]);
+    
+        } catch (error) {
+          console.error(`Fehler beim Aktualisieren von ${card.cardId}:`, error.message);
+        }
+      }
+    
+      console.log("cardName-Update abgeschlossen.");
+    }
+    
+    updateCardNameForExistingCards(); */
+
     window.cachedCards = {};
     let current = 0;
     const total = data.values.length;
@@ -463,18 +491,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.searchTable = searchTable; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
-
-    //Deklaration für Filter
-    const filterZustand = {
-      holo: false,
-      fullart: false,
-      vfamily: false,
-      rares: false
-    };
     
     const filterStates = {
       reverse: "neutral", // kann sein: "neutral", "positive", "negative"
-      holo: "neutral"
+      holo: "neutral",
+      v: "neutral",
+      vmax: "neutral",
+      ex: "neutral"
     };
 
     function applyFilter() {
@@ -486,6 +509,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
         let hasReverse = false;
         let hasHolo = false;
+        let hasV = false;
+        let hasVMAX = false;
+        let hasEX = false;
     
         cards.forEach(img => {
           const cardId = img.alt;
@@ -494,6 +520,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
           if (card.reverse == 1) hasReverse = true;
           if (card.holo == 1) hasHolo = true;
+          if (card.suffix == "V") hasV = true;
+          if (card.rarity.indexOf("VMAX") > -1 || card.rarity.indexOf("VSTAR") > -1) hasVMAX = true;
+          if (card.suffix == "EX") hasEX = true;
+
         });
     
         let show = true;
@@ -505,6 +535,18 @@ document.addEventListener("DOMContentLoaded", () => {
         // Holo-Filter prüfen
         if (filterStates.holo === "positive" && !hasHolo) show = false;
         if (filterStates.holo === "negative" && hasHolo) show = false;
+
+        // V-Filter prüfen
+        if (filterStates.v === "positive" && !hasV) show = false;
+        if (filterStates.v === "negative" && hasV) show = false;
+
+        // VMAX-Filter prüfen
+        if (filterStates.vmax === "positive" && !hasVMAX) show = false;
+        if (filterStates.vmax === "negative" && hasVMAX) show = false;
+
+        // Ex-Filter prüfen
+        if (filterStates.ex === "positive" && !hasEX) show = false;
+        if (filterStates.ex === "negative" && hasEX) show = false;
     
         row.style.display = show ? "" : "none";
       });
@@ -530,6 +572,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateNavStyles() {
       const reverseBtn = document.getElementById("filter-reverse");
       const holoBtn = document.getElementById("filter-holo");
+      const vBtn = document.getElementById("filter-v");
+      const vmaxBtn = document.getElementById("filter-vmax");
+      const exBtn = document.getElementById("filter-ex");
+
     
       reverseBtn.className = filterStates.reverse === "positive"
         ? "active-positive"
@@ -542,12 +588,33 @@ document.addEventListener("DOMContentLoaded", () => {
         : filterStates.holo === "negative"
         ? "active-negative"
         : "";
+    
+      vBtn.className = filterStates.v === "positive"
+        ? "active-positive"
+        : filterStates.v === "negative"
+        ? "active-negative"
+        : "";
+    
+      vmaxBtn.className = filterStates.vmax === "positive"
+        ? "active-positive"
+        : filterStates.vmax === "negative"
+        ? "active-negative"
+        : "";
+    
+      exBtn.className = filterStates.ex === "positive"
+        ? "active-positive"
+        : filterStates.ex === "negative"
+        ? "active-negative"
+        : "";
     }
 
     document.getElementById("filter-alle").addEventListener("click", (e) => {
       e.preventDefault();
       filterStates.reverse = "neutral";
       filterStates.holo = "neutral";
+      filterStates.v = "neutral";
+      filterStates.vmax = "neutral";
+      filterStates.ex = "neutral"
       applyFilter();
       updateNavStyles();
     });
@@ -561,7 +628,21 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       toggleFilter("holo");
     });
-    
+
+    document.getElementById("filter-v").addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleFilter("v");
+    });
+
+    document.getElementById("filter-vmax").addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleFilter("vmax");
+    });
+
+    document.getElementById("filter-ex").addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleFilter("ex");
+    });
 
   })();
 });

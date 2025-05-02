@@ -10,6 +10,9 @@ export async function initDatabase() {
   //Tabellen löschen, falls vorhanden (NUR FÜR DEVENV, NICHT PROD)
   //await db.execute(`DROP TABLE IF EXISTS pokemon`);
   //await db.execute(`DROP TABLE IF EXISTS cards`);
+  
+  //Spalte cardName hinzufügen
+  //await db.execute(`ALTER TABLE cards ADD COLUMN cardName TEXT`);
 
   //Tabelle anlegen
   await db.execute(`
@@ -35,7 +38,9 @@ export async function initDatabase() {
       holo INTEGER DEFAULT 0,
       addedAt TEXT,
       imageLow BLOB,
-      imageHigh BLOB
+      imageHigh BLOB,
+      suffix TEXT,
+      cardName TEXT
     );
   `);
 
@@ -1112,10 +1117,13 @@ export async function insertCard(cardData) {
   const lowBlob = await fetchImageAsBlob(cardData.image + "/low.webp");
   const highBlob = await fetchImageAsBlob(cardData.image + "/high.webp");
 
+  const suffix = cardData.suffix || "Unbekannt";
+  const cardName = cardData.name || "Unbekannt";
+
   try {
     await db.run(
-      "INSERT INTO cards (cardId, rarity, setName, basic, reverse, holo, addedAt, imageLow, imageHigh) VALUES (?, ?, ?, 0, 0, 0, ?, ?, ?)",
-      [cardData.id, rarity, setName, addedAt, lowBlob, highBlob]
+      "INSERT INTO cards (cardId, rarity, setName, basic, reverse, holo, addedAt, imageLow, imageHigh, suffix, cardName) VALUES (?, ?, ?, 0, 0, 0, ?, ?, ?, ?)",
+      [cardData.id, rarity, setName, addedAt, lowBlob, highBlob, suffix, cardName]
     );
 
     const idResult = await db.query("SELECT last_insert_rowid() AS id");
