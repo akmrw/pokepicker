@@ -326,8 +326,9 @@ document.addEventListener("DOMContentLoaded", () => {
       
       try {
 
-        if (engName == "Marill") { engName = "Marill&name=not:Azumarill"};
-        if (engName == "Mew") { engName = "Mew&name=not:Mewtwo"};
+        if (engName == "Marill") { engName = "Marill&name=not:Azumarill"}
+        else if (engName == "Mew") { engName = "Mew&name=not:Mewtwo"}
+        else if (engName == "Kabuto") { engName = "Kabuto&name=not:Kabutops"};
 
         let url = `https://api.tcgdex.net/v2/en/cards?name=${engName}&image=not:tcgp`;
         
