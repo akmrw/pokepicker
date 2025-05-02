@@ -497,7 +497,8 @@ document.addEventListener("DOMContentLoaded", () => {
       holo: "neutral",
       v: "neutral",
       vmax: "neutral",
-      ex: "neutral"
+      ex: "neutral",
+      shiny: "neutral"
     };
 
     function applyFilter() {
@@ -512,6 +513,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let hasV = false;
         let hasVMAX = false;
         let hasEX = false;
+        let hasShiny = false;
     
         cards.forEach(img => {
           const cardId = img.alt;
@@ -520,9 +522,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
           if (card.reverse == 1) hasReverse = true;
           if (card.holo == 1) hasHolo = true;
-          if (card.suffix == "V") hasV = true;
-          if (card.rarity.indexOf("VMAX") > -1 || card.rarity.indexOf("VSTAR") > -1) hasVMAX = true;
-          if (card.suffix == "EX") hasEX = true;
+          if (card.suffix == "V" || card.cardName.indexOf(" V") > -1) hasV = true;
+          if (card.rarity.indexOf("VMAX") > -1 || card.rarity.indexOf("VSTAR") > -1 ||
+              card.cardName.indexOf("VMAX") > -1 || card.cardName.indexOf("VSTAR") > -1
+            ) hasVMAX = true;
+          if (card.suffix == "EX" || card.cardName.indexOf(" ex") > -1 || card.cardName.indexOf(" EX") > -1) hasEX = true;
+          if (card.rarity.indexOf("shiny") > -1 || card.rarity.indexOf("Shiny") > -1 ||
+              card.rarity.indexOf("radiant") > -1 || card.rarity.indexOf("Radiant") > -1
+            ) hasShiny = true;
 
         });
     
@@ -547,6 +554,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Ex-Filter prüfen
         if (filterStates.ex === "positive" && !hasEX) show = false;
         if (filterStates.ex === "negative" && hasEX) show = false;
+
+        // Shiny-Filter prüfen
+        if (filterStates.shiny === "positive" && !hasShiny) show = false;
+        if (filterStates.shiny === "negative" && hasShiny) show = false;
     
         row.style.display = show ? "" : "none";
       });
@@ -575,7 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const vBtn = document.getElementById("filter-v");
       const vmaxBtn = document.getElementById("filter-vmax");
       const exBtn = document.getElementById("filter-ex");
-
+      const shinyBtn = document.getElementById("filter-shiny");
     
       reverseBtn.className = filterStates.reverse === "positive"
         ? "active-positive"
@@ -606,6 +617,12 @@ document.addEventListener("DOMContentLoaded", () => {
         : filterStates.ex === "negative"
         ? "active-negative"
         : "";
+    
+      shinyBtn.className = filterStates.shiny === "positive"
+        ? "active-positive"
+        : filterStates.shiny === "negative"
+        ? "active-negative"
+        : "";
     }
 
     document.getElementById("filter-alle").addEventListener("click", (e) => {
@@ -614,7 +631,8 @@ document.addEventListener("DOMContentLoaded", () => {
       filterStates.holo = "neutral";
       filterStates.v = "neutral";
       filterStates.vmax = "neutral";
-      filterStates.ex = "neutral"
+      filterStates.ex = "neutral";
+      filterStates.shiny = "neutral";
       applyFilter();
       updateNavStyles();
     });
@@ -642,6 +660,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filter-ex").addEventListener("click", (e) => {
       e.preventDefault();
       toggleFilter("ex");
+    });
+
+    document.getElementById("filter-shiny").addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleFilter("shiny");
     });
 
   })();
