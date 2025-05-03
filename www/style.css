@@ -44,15 +44,6 @@ a:visited {
     text-decoration: none;
 }
 
-a:hover {
-    text-decoration: underline;
-}
-
-a:active {
-    text-decoration: underline;
-    color: #DEDEDE;
-}
-
 table,
 th,
 td {
@@ -78,31 +69,6 @@ td.pokemon {
     text-align: center;
 }
 
-.kartenAnzahl {
-    text-align: center;
-    width: 20px;
-}
-
-.saveButton {
-    font-family: "Saira Condensed", sans-serif;
-    color: #DEDEDE;
-    background-color: #333333;
-    text-align: center;
-    vertical-align: baseline;
-    width: 80px;
-    height: 25px;
-}
-
-.checkmark {
-    color: green;
-    float: inline-end;
-    display: none;
-}
-
-.saveButton:hover {
-    color: #00AEFF;
-}
-
 #search {
     width: 200px;
     margin-left: 10px;
@@ -111,7 +77,11 @@ td.pokemon {
 
 div.search {
     text-align: center;
-    padding-bottom: 10px;
+    margin-top: 15px;
+}
+
+label[for=search] {
+    display: inline-block;
 }
 
 table {
@@ -137,6 +107,51 @@ nav a.active-positive {
 
 nav a.active-negative {
     color: red;
+}
+
+#cardLoader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: "Saira", sans-serif;
+    color: #DEDEDE;
+    background: #333333;
+    text-align: center;
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+#loaderText {
+    font-size: 16px;
+    min-width: 110px;
+    margin-right: 5px;
+    margin-left: 15px;
+}
+
+#progressText {
+    min-width: 40px;
+    margin-right: 15px;
+}
+
+#progressBarContainer {
+    width: 100%;
+    max-width: 400px;
+    height: 20px;
+    background-color: #555;
+    border-radius: 10px;
+    margin: 10px auto 10px;
+    overflow: hidden;
+  }
+  
+#progressBar {
+    height: 100%;
+    width: 50%;
+    background-color: #00AEFF;
+    transition: width 0.3s ease;
 }
 
 #overlay {
@@ -232,28 +247,4 @@ button.closeGallery {
     color: #DEDEDE;
     border: none;
     cursor: pointer;
-}
-
-#progressBarContainer {
-    width: 100%;
-    max-width: 400px;
-    height: 20px;
-    background-color: #555;
-    border-radius: 10px;
-    margin: 20px auto 10px;
-    overflow: hidden;
-  }
-  
-  #progressBar {
-    height: 100%;
-    width: 0%;
-    background-color: #00AEFF;
-    transition: width 0.3s ease;
-  }
-  
-  #progressText {
-    text-align: center;
-    font-size: 16px;
-    margin-top: 0;
-  }
-  
+} 

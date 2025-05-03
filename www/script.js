@@ -4,19 +4,16 @@ let db;
 document.addEventListener("DOMContentLoaded", () => {
   (async () => {
 
-    const overlay = document.getElementById("overlay");
-    overlay.innerHTML = `
-      <div id="overlayContent">
-        <h2>Karten werden geladen…</h2>
-        <div class="loader"></div>
-        <div id="progressBarContainer">
-          <div id="progressBar"></div>
-        </div>
-        <p id="progressText">0%</p>
+    const cardLoader = document.getElementById("cardLoader");
+    cardLoader.innerHTML = `
+      <p id="loaderText">Lade Karten…</p>
+      <div id="progressBarContainer">
+        <div id="progressBar"></div>
       </div>
+      <div id="progressText">0%</div>
     `;
-    overlay.classList.remove("hidden");
-    overlay.classList.add("shown");
+    cardLoader.classList.remove("hidden");
+    cardLoader.classList.add("shown");
     
     //SQLite-Datenbank-Initialisierung
     const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds, insertCard, getCardById, getCardsByIds } = await import("./db-init.js");
@@ -95,9 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateEintragsAnzahl();
     updateKartenAnzahl();
 
-    overlay.classList.add("hidden");
-    overlay.classList.remove("shown");
-    overlay.innerHTML = "";
+    cardLoader.classList.add("hidden");
+    cardLoader.classList.remove("shown");
+    cardLoader.innerHTML = "";
 
     //Aktualisieren der gezeigten Anzahl der Tabellen-Einträge
     function updateEintragsAnzahl() {

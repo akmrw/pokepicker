@@ -36,13 +36,14 @@
         </nav>
 
         <article>
-            <p>
-                <div class="search">
-                    <label for="search">Suche:</label>
-                    <input type="text" id="search" name="search" onkeyup="searchTable()" placeholder="Pokédex-Nr. oder Name..">
-                </div>
-            </p>
-            <p>
+            <div class="search">
+                <label for="search">Suche:</label>
+                <input type="text" id="search" name="search" onkeyup="searchTable()" placeholder="Pokédex-Nr. oder Name..">
+            </div>
+            <div id="cardLoader" class="hidden">
+                <!-- Hier wird Content per Script eingefügt -->
+            </div>
+
             <table id="kartentabelle">
                 <thead>
                     <tr>
@@ -55,7 +56,6 @@
                     <!-- Hier werden die Zeilen per Script eingefügt -->
                 </tbody>
             </table>
-            </P>
         </article>
 
         <div id="overlay" class="hidden">
