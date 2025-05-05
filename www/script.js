@@ -1,5 +1,5 @@
 import { Http } from '@capacitor-community/http';
-const API_KEY = 'a5d75d50-65e6-41a4-aa2f-9b2c93afaaa7';
+const config = require("./config.json")
 let db;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
           url: url,
           headers: {
             'Accept': 'application/json',
-            'X-Api-Key': API_KEY,
+            'X-Api-Key': config.API_KEY,
             'Connection': 'close'
           }
         });
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
           url,
           headers: {
             'Accept': 'application/json',
-            'X-Api-Key': API_KEY,
+            'X-Api-Key': config.API_KEY,
             'Connection': 'close'
           }
         });
@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
         url: `https://api.pokemontcg.io/v2/cards/${cardId}`,
         headers: {
           'Accept': 'application/json',
-          'X-Api-Key': API_KEY,
+          'X-Api-Key': config.API_KEY,
           'Connection': 'close'
         }
       });
