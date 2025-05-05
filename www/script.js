@@ -1,4 +1,5 @@
 import { Http } from '@capacitor-community/http';
+const API_KEY = 'a5d75d50-65e6-41a4-aa2f-9b2c93afaaa7';
 let db;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cardLoader.classList.add("shown");
     
     //SQLite-Datenbank-Initialisierung
-    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds, insertCard, getCardById, getCardsByIds } = await import("./db-init.js");
+    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds, insertCard, getCardById, getCardsByIds, updatePrice } = await import("./db-init.js");
     db = await initDatabase();
 
     //Tabelle definieren
@@ -89,12 +90,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } 
 
-    updateEintragsAnzahl();
-    updateKartenAnzahl();
-
     cardLoader.classList.add("hidden");
     cardLoader.classList.remove("shown");
     cardLoader.innerHTML = "";
+
+    updateEintragsAnzahl();
+    updateKartenAnzahl();
+    updateGesamtwert();
 
     //Aktualisieren der gezeigten Anzahl der Tabellen-Einträge
     function updateEintragsAnzahl() {
@@ -133,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fragment = document.createDocumentFragment();
 
       for (const card of cards) {
+        console.log("Geladene Karte:", card);  // DEBUG
         window.cachedCards[card.cardId] = card;
 
         const img = document.createElement("img");
@@ -140,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         img.style.width = "50px";
         img.style.height = "69px";
         img.style.objectFit = "cover";
-        img.src = URL.createObjectURL(card.imageLow);
+        img.src = card.imageLow;
 
         img.addEventListener("click", () => openCardGallery(dex, ids.indexOf(String(card.id))));
         fragment.appendChild(img);
@@ -190,15 +193,41 @@ document.addEventListener("DOMContentLoaded", () => {
           if (card.reverse == 1) variante = "Reverse";
           if (card.holo == 1) variante = "Holo";
 
+          // 🔁 Preis laden (mit Fallback)
+          let wert30d = await fetchPrice(card.cardId);
+          if (wert30d == null) {
+            const cleanedId = cleanCardId(card.cardId);
+            wert30d = await fetchPrice(cleanedId);
+          }
+
+          // 💶 Preis formatieren oder Ersatz anzeigen
+          let preisText = "–";
+          if (wert30d != null) {
+            const wert = wert30d.toFixed(2);
+            let farbe = "#DEDEDE"; // Standard grau
+            let symbol = "🪙";      // Günstig
+
+            if (wert30d > 20) {
+              farbe = "#FF4444";
+              symbol = "🔥";
+            } else if (wert30d > 5) {
+              farbe = "#FFAA00";
+              symbol = "💰";
+            }
+
+            preisText = `<span style="color:${farbe};">${symbol} ${wert}€</span>`;
+          }
+          
           overlayElement.innerHTML = `
             <div id="overlayContent">
             <button class="closeGallery" id="closeGallery">X</button>
               <h2>Karte ansehen</h2>
               <div style="display:flex; align-items:center; justify-content:center;">
                 <div style="display:flex; flex-direction:column; align-items:center;">
-                  <img id="cardImage" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
+                  <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                   <p style="margin-top:10px;">
                     Variante: <strong>${variante}</strong><br>
+                    30d-Wert: <strong>${preisText}</strong><br>
                     Hinzugefügt am: <strong>${hinzugefügtAm}
                   </p>
                 </div>
@@ -208,15 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <br><br>
               <button id="deleteCard">❌ Karte löschen</button>
             </div>
-          `;
-
-          if (card.imageHigh) {
-            const highUrl = URL.createObjectURL(card.imageHigh);
-            document.getElementById("cardImage").src = highUrl;
-          } else {
-            console.warn("Kein imageHigh vorhanden für Karte:", card.cardId);
-            document.getElementById("cardImage").alt = "Kein Bild vorhanden";
-          }          
+          `;    
     
           document.getElementById("prevCard").addEventListener("click", () => {
             currentIndex = (currentIndex - 1 + ids.length) % ids.length;
@@ -230,13 +251,25 @@ document.addEventListener("DOMContentLoaded", () => {
     
           document.getElementById("deleteCard").addEventListener("click", async () => {
             if (confirm("Willst du diese Karte wirklich löschen?")) {
+              const dbId = ids[currentIndex]; // das ist die Karten-ID in der DB
+          
+              // 1. Karte aus cards-Tabelle löschen
+              await db.run(`DELETE FROM cards WHERE id = ?`, [dbId]);
+          
+              // 2. ID aus der Liste entfernen und speichern
               ids.splice(currentIndex, 1);
               await updateCardIds(dex, ids.join(";") + ";");
+          
+              // 3. Galerie und Container neu laden
               overlayElement.classList.add("hidden");
               overlayElement.classList.remove("shown");
               overlayElement.innerHTML = "";
-              document.getElementById(`kartenContainer_${dex}`).innerHTML = "";
+          
+              const container = document.getElementById(`kartenContainer_${dex}`);
+              container.innerHTML = "";
               loadSavedCards(dex);
+              updateKartenAnzahl();
+              updateGesamtwert();
             }
           });
     
@@ -304,13 +337,33 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="kartenGrid">
         `;
     
-        cards.forEach(card => {
+        for (const card of cards) {
+          let wert30d = card.avg30;
+        
+          let preisText = "–";
+          if (wert30d != null) {
+            const wert = wert30d.toFixed(2);
+            let farbe = "#DEDEDE";
+            let symbol = "🪙";
+        
+            if (wert30d > 20) {
+              farbe = "#FF4444";
+              symbol = "🔥";
+            } else if (wert30d > 5) {
+              farbe = "#FFAA00";
+              symbol = "💰";
+            }
+        
+            preisText = `<span style="color:${farbe}; font-size:14px;">${symbol} ${wert}€</span>`;
+          }
+        
           html += `
             <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${name}')">
-              <img src="${card.image + '/low.webp'}" alt="${name}">
+              <img src="${card.images.small}" alt="${name}">
+              <div>${preisText}</div>
             </div>
           `;
-        });
+        }        
     
         html += `
             </div>
@@ -346,72 +399,105 @@ document.addEventListener("DOMContentLoaded", () => {
       }
         
     };
+
+    function cleanCardId(cardId) {
+      return cardId.replace(/-(0*)(\d+)/, (match, zeros, number) => {
+        return '-' + parseInt(number, 10);
+      });
+    }
   
     async function fetchCards(engName) {
-      
       try {
-
-        if (engName == "Marill") { engName = "Marill&name=not:Azumarill"}
-        else if (engName == "Mew") { engName = "Mew&name=not:Mewtwo"}
-        else if (engName == "Kabuto") { engName = "Kabuto&name=not:Kabutops"};
-
-        let url = `https://api.tcgdex.net/v2/en/cards?name=${engName}&image=not:tcgp`;
-        
+        const url = `https://api.pokemontcg.io/v2/cards?q=name:${engName}&orderBy=-set.releaseDate`;
         const response = await Http.get({
           url: url,
           headers: {
             'Accept': 'application/json',
+            'X-Api-Key': API_KEY,
             'Connection': 'close'
           }
         });
     
         if (response.status !== 200) {
-          throw new Error(`Fehlerstatus: ${response.status}`);
+          console.error("Fehler beim Abrufen der Karten:", response.status, response);
+          return null;
         }
     
-        const data = response.data; // Das fertige JSON
-        return data;
-        
+        const cards = response.data.data;
+    
+        // Extrahiere 30d-Preis direkt
+        for (const card of cards) {
+          const prices = card.cardmarket?.prices;
+          card.avg30 = prices?.avg30 ?? null;
+        }
+    
+        return cards;
+    
       } catch (error) {
         console.error('Fehler beim Abrufen über HTTP:', error.message);
         return null;
       }
-    }   
+    }    
+
+    async function fetchPrice(cardId) {
+      try {
+        const url = `https://api.pokemontcg.io/v2/cards?q=id:${cardId}`;
+        const response = await Http.get({
+          url,
+          headers: {
+            'Accept': 'application/json',
+            'X-Api-Key': API_KEY,
+            'Connection': 'close'
+          }
+        });
+    
+        if (response.status !== 200 || !response.data?.data?.length) {
+          console.error("Fehler beim Abrufen der Karte:", response.status, response);
+          console.log("Response body:", response.data);
+          return null;
+        }
+    
+        const prices = response.data.data[0]?.cardmarket?.prices;
+        return prices?.avg30 ?? null;
+    
+      } catch (error) {
+        console.error('Fehler beim Preisabruf:', error.message);
+        return null;
+      }
+    }    
 
     window.karteAuswählen = async function (cardId, dex, name) {
 
       const overlayElement = document.querySelector("#overlay");
+
+      overlayElement.innerHTML = `<div id="overlayContent"><div class="loader"></div></div>`;
+      overlayElement.classList.remove("hidden");
+      overlayElement.classList.add("shown");
     
       const response = await Http.get({
-        url: `https://api.tcgdex.net/v2/en/cards/${cardId}`,
-        headers: { 'Accept': 'application/json' }
+        url: `https://api.pokemontcg.io/v2/cards/${cardId}`,
+        headers: {
+          'Accept': 'application/json',
+          'X-Api-Key': API_KEY,
+          'Connection': 'close'
+        }
       });
     
-      if (response.status !== 200) return;
+      if (response.status !== 200) {
+        console.error("Fehler beim Abrufen der Karte:", response.status, response);
+        console.log("Response body:", response.data);
+        return;
+      }      
     
-      const cardData = response.data;
+      const cardData = response.data.data;
+      cardData.imageSmall = cardData.images?.small || null;
+      cardData.imageLarge = cardData.images?.large || null;
       const cardDbId = await insertCard(cardData);
+
       if (!cardDbId) {
         console.error("Keine ID von insertCard erhalten – Abbruch.");
         return;
       }
-
-      // Bilder herunterladen und speichern
-      async function blobToUint8Array(blob) {
-        const arrayBuffer = await blob.arrayBuffer();
-        return new Uint8Array(arrayBuffer);
-      }
-
-      const lowBlob = await fetch(cardData.image + "/low.webp").then(r => r.blob());
-      const highBlob = await fetch(cardData.image + "/high.webp").then(r => r.blob());
-
-      const lowArray = await blobToUint8Array(lowBlob);
-      const highArray = await blobToUint8Array(highBlob);
-
-      await db.run(
-        "UPDATE cards SET imageLow = ?, imageHigh = ? WHERE id = ?",
-        [lowArray, highArray, cardDbId]
-      );
     
       overlayElement.innerHTML = `
         <div id="overlayContent">
@@ -428,6 +514,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
       async function finalizeCardSelection(variantType) {
 
+        overlayElement.innerHTML = `<div id="overlayContent"><div class="loader"></div></div>`;
+        overlayElement.classList.remove("hidden");
+        overlayElement.classList.add("shown");
+
         if (variantType !== "none") {
           await db.run(`UPDATE cards SET ${variantType} = 1 WHERE id = ?`, [cardDbId]);
         }
@@ -436,10 +526,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cardIds) cardIds = "";
         cardIds += cardDbId + ";";
         await updateCardIds(dex, cardIds);
-    
+
         const container = document.getElementById(`kartenContainer_${dex}`);
         const img = document.createElement("img");
-        img.src = cardData.image + "/low.webp";
+        img.src = cardData.images.small;
         img.alt = cardId;
         img.style.width = "50px";
         img.style.height = "69px";
@@ -455,6 +545,10 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.classList.add("hidden");
         overlayElement.classList.remove("shown");
         overlayElement.innerHTML = "";
+
+        updateEintragsAnzahl();
+        updateKartenAnzahl();
+        updateGesamtwert();
       }
     
       document.getElementById("btnBasic").addEventListener("click", () => finalizeCardSelection("basic"));
@@ -463,6 +557,52 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("closeOverlayConfirm").addEventListener("click", () => finalizeCardSelection("none"));
       
     };    
+
+    async function updateGesamtwert() {
+      try {
+        const result = await db.query(`SELECT avg30 FROM cards WHERE avg30 IS NOT NULL`);
+        let summe = 0;
+    
+        for (const row of result.values) {
+          summe += row.avg30;
+        }
+    
+        let symbol = "🪙";
+        if (summe > 1000) symbol = "🔥";
+        else if (summe > 500) symbol = "💰";
+    
+        const text = `Gesamtwert: ${symbol} ${summe.toFixed(2)}€`;
+        document.getElementById("gesamtwert").textContent = text;
+    
+      } catch (error) {
+        console.error("Fehler beim Berechnen des Gesamtwerts:", error);
+      }
+    }
+    
+    async function aktualisiereAllePreise() {
+      const result = await db.query(`SELECT cardId FROM cards`);
+      let aktualisiert = 0;
+    
+      for (const row of result.values) {
+        const cardId = row.cardId;
+    
+        let preis = await fetchPrice(cardId);
+        if (preis == null) {
+          const cleaned = cleanCardId(cardId);
+          preis = await fetchPrice(cleaned);
+        }
+    
+        if (preis != null) {
+          await updatePrice(cardId, preis);
+          aktualisiert++;
+        }
+      }
+    
+      alert(`${aktualisiert} Preise wurden aktualisiert.`);
+      updateGesamtwert();
+    }    
+
+    window.aktualisiereAllePreise = aktualisiereAllePreise;
 
     //Filtert die Tabellen-Einträge nach Input (Dex-Nr. oder Name)
     function searchTable() {
@@ -485,6 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       updateEintragsAnzahl();
       updateKartenAnzahl();
+      updateGesamtwert();
     }
 
     window.searchTable = searchTable; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
@@ -519,14 +660,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
           if (card.reverse == 1) hasReverse = true;
           if (card.holo == 1) hasHolo = true;
-          if (card.suffix == "V" || card.cardName.indexOf(" V") > -1) hasV = true;
-          if (card.rarity.indexOf("VMAX") > -1 || card.rarity.indexOf("VSTAR") > -1 ||
-              card.cardName.indexOf("VMAX") > -1 || card.cardName.indexOf("VSTAR") > -1
-            ) hasVMAX = true;
-          if (card.suffix == "EX" || card.cardName.indexOf(" ex") > -1 || card.cardName.indexOf(" EX") > -1) hasEX = true;
-          if (card.rarity.indexOf("shiny") > -1 || card.rarity.indexOf("Shiny") > -1 ||
-              card.rarity.indexOf("radiant") > -1 || card.rarity.indexOf("Radiant") > -1
-            ) hasShiny = true;
+          if (card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v")) hasV = true;
+          if (card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax") || 
+              card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar")) hasVMAX = true;
+          if (card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex")) hasEX = true;
+          if (card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny")) hasShiny = true;
 
         });
     
@@ -561,6 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
       updateEintragsAnzahl();
       updateKartenAnzahl();
+      updateGesamtwert();
     }
     
     function toggleFilter(type) {

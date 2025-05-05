@@ -218,6 +218,11 @@ nav a.active-negative {
     object-fit: cover;
 }
 
+.kartenItem div {
+    margin-top: 5px;
+    font-size: 14px;
+  }  
+
 .loader {
     border: 8px solid #f3f3f3;
     border-top: 8px solid #00AEFF;
@@ -248,3 +253,14 @@ button.closeGallery {
     border: none;
     cursor: pointer;
 } 
+
+#preiseAktualisieren {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    font-size: 24px;
+    background: none;
+    color: #DEDEDE;
+    border: none;
+    cursor: pointer;
+}

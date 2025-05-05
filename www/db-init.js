@@ -32,15 +32,15 @@ export async function initDatabase() {
       cardId TEXT,
       rarity TEXT,
       setName TEXT,
-      variants TEXT,
       basic INTEGER DEFAULT 0,
       reverse INTEGER DEFAULT 0,
       holo INTEGER DEFAULT 0,
       addedAt TEXT,
-      imageLow BLOB,
-      imageHigh BLOB,
-      suffix TEXT,
-      cardName TEXT
+      imageLow TEXT,
+      imageHigh TEXT,
+      cardName TEXT,
+      subTypes TEXT,
+      avg30 REAL
     );
   `);
 
@@ -1110,61 +1110,53 @@ export async function updateCardIds(dex, cardIds) {
 }
 
 export async function insertCard(cardData) {
-  const rarity = cardData.rarity || "Unbekannt";
-  const setName = (cardData.set && cardData.set.name) ? cardData.set.name : "Unbekannt";
-  const addedAt = new Date().toISOString(); // Jetzt aktuelles Datum erzeugen
-
-  const lowBlob = await fetchImageAsBlob(cardData.image + "/low.webp");
-  const highBlob = await fetchImageAsBlob(cardData.image + "/high.webp");
-
-  const suffix = cardData.suffix || "Unbekannt";
-  const cardName = cardData.name || "Unbekannt";
-
   try {
-    await db.run(
-      "INSERT INTO cards (cardId, rarity, setName, basic, reverse, holo, addedAt, imageLow, imageHigh, suffix, cardName) VALUES (?, ?, ?, 0, 0, 0, ?, ?, ?, ?)",
-      [cardData.id, rarity, setName, addedAt, lowBlob, highBlob, suffix, cardName]
+
+    const imageLow = typeof cardData.imageSmall === 'string' ? cardData.imageSmall : null;
+    const imageHigh = typeof cardData.imageLarge === 'string' ? cardData.imageLarge : null;
+
+    const result = await db.run(
+      `INSERT INTO cards (cardId, cardName, rarity, setName, imageLow, imageHigh, subTypes, addedAt, avg30)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        cardData.id,
+        cardData.name,
+        cardData.rarity || '',
+        cardData.set?.name || '',
+        imageLow,
+        imageHigh,
+        Array.isArray(cardData.subtypes) ? cardData.subtypes.join(", ") : '',
+        new Date().toISOString(),
+        cardData.cardmarket?.prices?.avg30 ?? null
+      ]
     );
 
-    const idResult = await db.query("SELECT last_insert_rowid() AS id");
-    return idResult.values[0].id;
+    return result.changes?.lastId || null;
 
-  } catch (e) {
-    console.error("Fehler beim Einfügen der Karte:", e);
+  } catch (error) {
+    console.error("Fehler in insertCard():", error.message || error, cardData?.id || "unbekannte Karte");
     return null;
   }
 }
 
 export async function getCardById(id) {
-  const result = await db.query("SELECT * FROM cards WHERE id = ?", [id]);
-  if (result.values.length === 0) return null;
-
-  const card = result.values[0];
-  
-  if (card.imageLow && !(card.imageLow instanceof Blob)) {
-    card.imageLow = new Blob([new Uint8Array(card.imageLow)], { type: 'image/webp' });
-  }
-  if (card.imageHigh && !(card.imageHigh instanceof Blob)) {
-    card.imageHigh = new Blob([new Uint8Array(card.imageHigh)], { type: 'image/webp' });
-  }  
-
-  return card;
-}
-
-async function fetchImageAsBlob(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Image download failed');
-  return await response.blob();
+  const result = await db.query(`SELECT * FROM cards WHERE id = ?`, [id]);
+  return result.values?.[0] || null;
 }
 
 export async function getCardsByIds(ids) {
   const placeholders = ids.map(() => '?').join(',');
   const result = await db.query(`SELECT * FROM cards WHERE id IN (${placeholders})`, ids);
+  return result.values;
+}
 
-  return result.values.map(card => {
-    if (card.imageLow && !(card.imageLow instanceof Blob)) {
-      card.imageLow = new Blob([new Uint8Array(card.imageLow)], { type: 'image/webp' });
-    }
-    return card;
-  });
+export async function updatePrice(cardId, avg30) {
+  try {
+    await db.run(
+      `UPDATE cards SET avg30 = ? WHERE cardId = ?`,
+      [avg30, cardId]
+    );
+  } catch (error) {
+    console.error(`Fehler beim Speichern von avg30 für ${cardId}:`, error.message);
+  }
 }

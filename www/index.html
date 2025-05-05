@@ -24,6 +24,8 @@
             <img src="pokepicker_logo_transparent.png" alt="PokéPicker">
         </header>
 
+        <button id="preiseAktualisieren" onclick="aktualisiereAllePreise()">📈</button>
+
         <nav>
             <a href="#" id="filter-alle">Alle</a>
             <a href="#" id="filter-reverse">Reverse</a>
@@ -43,7 +45,7 @@
             <div id="cardLoader" class="hidden">
                 <!-- Hier wird Content per Script eingefügt -->
             </div>
-
+            <p id="gesamtwert" style="text-align: center; font-size: 18px; margin-top: 20px;">Gesamtwert: 🪙 0.00€</p>
             <table id="kartentabelle">
                 <thead>
                     <tr>
