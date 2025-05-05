@@ -1100,7 +1100,10 @@
           `,document.getElementById("BackBtn").addEventListener("click",g=>{g.preventDefault(),c.classList.add("hidden"),c.classList.remove("shown"),c.innerHTML=""});return}let y=`
           <div id="overlayContent">
             <button class="closeGallery" id="BackBtn">X</button>
-            <h2>Kartenauswahl f\xFCr ${u}:</h2>
+            <h2>
+              Kartenauswahl f\xFCr<br>
+              <strong>${u}</strong>:
+            </h2>
             <p>Welche Karte m\xF6chtest du hinzuf\xFCgen?</p>
             <div class="kartenGrid">
         `;for(let g of h){let m=g.avg30,w="\u2013";if(m!=null){let x=m.toFixed(2),k="#DEDEDE",L="\u{1FA99}";m>20?(k="#FF4444",L="\u{1F525}"):m>5&&(k="#FFAA00",L="\u{1F4B0}"),w=`<span style="color:${k}; font-size:14px;">${L} ${x}\u20AC</span>`}y+=`

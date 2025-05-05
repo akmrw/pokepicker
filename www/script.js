@@ -333,7 +333,10 @@ document.addEventListener("DOMContentLoaded", () => {
         let html = `
           <div id="overlayContent">
             <button class="closeGallery" id="BackBtn">X</button>
-            <h2>Kartenauswahl für ${name}:</h2>
+            <h2>
+              Kartenauswahl für<br>
+              <strong>${name}</strong>:
+            </h2>
             <p>Welche Karte möchtest du hinzufügen?</p>
             <div class="kartenGrid">
         `;
