@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
           overlayElement.innerHTML = `
             <div id='overlayContent'>
               <h2>Keine Karten gefunden.</h2> 
-              <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
+              <button class="overlayMenuBtn" id="BackBtn">Schließen</button>
             </div>
           `;
 
@@ -332,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
         let html = `
           <div id="overlayContent">
+            <button class="closeGallery" id="BackBtn">X</button>
             <h2>Kartenauswahl für ${name}:</h2>
             <p>Welche Karte möchtest du hinzufügen?</p>
             <div class="kartenGrid">
@@ -367,8 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
         html += `
             </div>
-            <br><br>
-            <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
           </div>
         `;
     
@@ -386,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.innerHTML = `
         <div id='overlayContent'>
           <h2>Fehler beim Laden.</h2>
-          <button class="overlayMenuBtn" id="BackBtn">Zurück</button>
+          <button class="overlayMenuBtn" id="BackBtn">Schließen</button>
         </div>`;
 
         document.getElementById("BackBtn").addEventListener("click", e => {
