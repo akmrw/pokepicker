@@ -1,3 +1,5 @@
+<img href="www/pokepicker_logo_transparent.png">
+
 # Poképicker
 
 ## Eine iOS-App, mit der du deine PokémonTCG-Karten organisieren kannst.
