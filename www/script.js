@@ -24,34 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await getDaten();
     const tbody = document.querySelector("#kartentabelle tbody");
 
-    /* async function updateCardNameForExistingCards() {
-      const { values: cards } = await db.query("SELECT id, cardId FROM cards WHERE cardName IS NULL OR cardName = ''");
-    
-      for (const card of cards) {
-        try {
-          const response = await Http.get({
-            url: `https://api.tcgdex.net/v2/en/cards/${card.cardId}`,
-            headers: { 'Accept': 'application/json' }
-          });
-    
-          if (response.status !== 200 || !response.data) {
-            console.warn(`Keine Daten für Karte ${card.cardId}`);
-            continue;
-          }
-    
-          const cardName = response.data.name || null;
-          await db.run(`UPDATE cards SET cardName = ? WHERE id = ?`, [cardName, card.id]);
-    
-        } catch (error) {
-          console.error(`Fehler beim Aktualisieren von ${card.cardId}:`, error.message);
-        }
-      }
-    
-      console.log("cardName-Update abgeschlossen.");
-    }
-    
-    updateCardNameForExistingCards(); */
-
     window.cachedCards = {};
     let current = 0;
     const total = data.values.length;
@@ -82,13 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Fortschritt berechnen
       current++;
-      const percent = Math.round((current / total) * 100);
+      const percent = Math.min(99, Math.round((current / total) * 100));
       const progressBar = document.getElementById("progressBar");
       const progressText = document.getElementById("progressText");
       if (progressBar) progressBar.style.width = percent + "%";
       if (progressText) progressText.textContent = percent + "%";
 
     } 
+
+    progressBar.style.width = "100%";
+    progressText.textContent = "100%";
 
     cardLoader.classList.add("hidden");
     cardLoader.classList.remove("shown");
@@ -592,6 +567,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let aktualisiert = 0;
       let current = 0;
       let total = result.values.length;
+
+      alert(`Aktualisierung von ${total} Preisen gestartet.`);
     
       for (const row of result.values) {
         const cardId = row.cardId;
@@ -613,7 +590,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (updateProgress) updateProgress.textContent = percent + "%";
       }
     
-      alert(`${aktualisiert} Preise wurden aktualisiert.`);
+      updateProgress.textContent = "";
+      alert(`${aktualisiert} Preise wurden aktualisiert!`);
       updateGesamtwert();
     }    
 
@@ -817,6 +795,34 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       toggleFilter("shiny");
     });
+
+    /* async function updateCardNameForExistingCards() {
+      const { values: cards } = await db.query("SELECT id, cardId FROM cards WHERE cardName IS NULL OR cardName = ''");
+    
+      for (const card of cards) {
+        try {
+          const response = await Http.get({
+            url: `https://api.tcgdex.net/v2/en/cards/${card.cardId}`,
+            headers: { 'Accept': 'application/json' }
+          });
+    
+          if (response.status !== 200 || !response.data) {
+            console.warn(`Keine Daten für Karte ${card.cardId}`);
+            continue;
+          }
+    
+          const cardName = response.data.name || null;
+          await db.run(`UPDATE cards SET cardName = ? WHERE id = ?`, [cardName, card.id]);
+    
+        } catch (error) {
+          console.error(`Fehler beim Aktualisieren von ${card.cardId}:`, error.message);
+        }
+      }
+    
+      console.log("cardName-Update abgeschlossen.");
+    }
+    
+    updateCardNameForExistingCards(); */
 
   })();
 });

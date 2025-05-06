@@ -149,9 +149,9 @@ nav a.active-negative {
   
 #progressBar {
     height: 100%;
-    width: 50%;
+    width: 0%;
     background-color: #00AEFF;
-    transition: width 0.3s ease;
+    transition: width 0.1s ease;
 }
 
 #overlay {
@@ -257,7 +257,7 @@ button.closeGallery {
 #preiseAktualisieren {
     position: absolute;
     top: 80px;
-    right: 20px;
+    right: 0px;
     font-size: 24px;
     background: none;
     color: #DEDEDE;
@@ -267,9 +267,9 @@ button.closeGallery {
 
 #preiseAktualisierenProgress {
     position: absolute;
-    top: 80px;
-    right: 30px;
-    font-size: 24px;
+    top: 82px;
+    right: 35px;
+    font-size: 16px;
     text-align: right;
     background: none;
     color: #DEDEDE;
