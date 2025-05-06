@@ -264,3 +264,15 @@ button.closeGallery {
     border: none;
     cursor: pointer;
 }
+
+#preiseAktualisierenProgress {
+    position: absolute;
+    top: 80px;
+    right: 30px;
+    font-size: 24px;
+    text-align: right;
+    background: none;
+    color: #DEDEDE;
+    border: none;
+    cursor: pointer;
+}

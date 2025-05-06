@@ -1,53 +1,66 @@
 # Poképicker
 
-## An iOS app designed to organize your Pokémon TCG cards.
+## Eine iOS-App, mit der du deine PokémonTCG-Karten organisieren kannst.
 
-### Features from top of app to bottom
+### Features der App (von oben nach unten)
 
 #### 1. Filter
 
-The buttons in the top section of the app can be used to filter the Pokédex based on your needs:
+Die Buttons im oberen Teil der App können genutzt werden, um die Kartentabelle nach deinen Wünschen zu filtern:
 
-- **Alle**:             disables all filters and shows all Pokémon regardless of amount of cards
-- **(Reverse) Holo**:   shows/hides all Pokémon which have at least one Reverse Holo oder Holo card
-- **Full-Art**:         shows/hides all Pokémon which have at least one Full-Art card
-- **V / VMAX / ex**:    shows/hides all Pokémon which have at least one V, VMAX, VSTAR or ex card 
-- **Rares**:            shows/hides all Pokémon which have at least one Rare, Amazing Rare, Rainbow Rare, Gold Rare or Shiny card
+- **Alle**:             deaktiviert alle Filter und zeigt alle Pokémon und Karten
+- **Reverse**:          zeigt/versteckt alle Pokémon mit mindestens einer Reverse Holo Karte
+- **Holo**:             zeigt/versteckt alle Pokémon mit mindestens einer Holo Karte
+- **Shiny**:            zeigt/versteckt alle Pokémon mit mindestens einer Shiny Karte
+- **V**:                zeigt/versteckt alle Pokémon mit mindestens einer V Karte
+- **VMAX/VSTAR**:       zeigt/versteckt alle Pokémon mit mindestens einer VMAX oder VSTAR Karte
+- **EX**:               zeigt/versteckt alle Pokémon mit mindestens einer ex Karte
 
-With the first click on the a filter you activate the positive logic of that exact filter, meaning e.g. that clicking "Full-Art" once will trigger the logic to show you all Pokémon which DO have at least one Full-Art card. The green color of that filter indicates the positive logic beeing used to filter the Pokédex.<br/>
-With another click on the exact same filter you can reverse that logic, meaning e.g. that clicking "Full-Art" again will trigger the logic to show you all Pokémon which DO NOT have any Full-Art card. The red color of that filter indicates the reverse logic beeing used to filter the Pokédex.
+Jeder dieser Filter hat drei Regelstufen (mit Ausnahme von "Alle"):
 
-#### 2. Search
 
-When you're looking for a specific Pokémon within the Pokédex you can use the search bar to lookup that Pokémon either by entering the Pokédex-No. or the name of the Pokémon you're looking for. For example you can either enter "Schiggy" or "0007" to get the same result.<br/>
-When searching by Pokédex-No. it is recommended to enter the Pokédex-No. with leading zeros (e.g. "0007"), otherwise the search results can be a little unexpected since the logic will show every Pokémon with a Pokédex-No. containing e.g. a "7" (0007, 0017, 0027, 0037, 0047 and so on).
+1. Mit dem ersten Klick auf den Filter wird die aktive Logik des Filters angewendet. Das bedeutet, dass beim ersten Klick auf bspw. den Filter "V" alle Pokémon angezeigt werden, bei denen mindestens eine V-Karte hinterlegt ist. Der Filter wird bei Klick grün und zeigt somit die aktive Logik des Filters an.<br/>
+2. Mit einem weiteren Klick auf denselben Filter wird die Logik umgekehrt. Das bedeutet, dass beim zweiten Klick auf denselben Filter alle Pokémon angezeigt werden, bei denen KEINE V-Karte hinterlegt ist. Der Filter wird beim zweiten Klick rot und zeigt somit die umgekehrte Logik des Filters an.<br/>
+3. Ein weiterer Klick auf denselben Filter deaktiviert jegliche Filterfunktionen. Der Filter ist nun wieder Blau.
 
-#### 3. Link to Pokéwiki.de
 
-A click onto any Pokémon-name in the Pokédex will open a corresponding Pokéwiki-Page of that Pokémon.
+Diese Filter lassen sich beliebig kombinieren. So lassen sich Filter einstellen, die einem bspw. alle Pokémon zeigen, bei denen noch keine Reverse- und Holo-Karten, dafür jedoch ex-Karten hinterlegt sind.
 
-#### 4. Organizing your TCG cards
+#### 2. Suche
 
-In the third column of the Pokédex you can add your cards to any Pokémon by clicking the button "+ Neue Karte".<br/>
-The following input fields will appear: REVERSE, HOLO, V, VMAX, VSTAR, EX, SHINY, FULLART, RARE, AMAZING, RAINBOW, GOLD and CUSTOM.<br/>
-You then can enter any number of cards into the corresponding fields. After entering a number the label of that field will switch places with a "Speichern!"-Button to save your input. After clicking "Speichern!" a green check mark will appear for 3 seconds, to tell you that your input has been successfully saved to the database and the label of the field will be seen again.<br/>
-After entering all of your cards for that Pokémon you can click on the "Schließen"-Button to hide all empty fields again and continue with the next Pokémon.
+Wenn du ein spezielles Pokémon aus der Tabelle heraussuchen möchtest, kannst du dafür die Suchleiste nutzen. Trage hierfür in der Suchleiste einfach den Namen des Pokémons oder seine entsprechende Pokédex-Nummer ein. Zum Beispiel bringen die Suchanfragen für "Schiggy" und "0007" dasselbe Ergebnis.<br/>
+Wenn du die Pokédex-Nummer für die Suche verwendest empfehle ich dir, wie im Beispiel zu sehen, die führenden Nullen anzugeben. Andernfalls könnten die Ergebnisse etwas unerwartet sein, da die Logik alle Pokémon zeigt, in dessen Pokédex-Nummer eine 7 vorkommt (0007, 0017, 0027, 0037, 0047 usw.).
 
-### Used Technology
+#### 3. Kartenwert (powered by Cardmarket.com)
 
-The whole app is based on HTML, CSS and JavaScript for frontend.<br/>
-Node.js and SQLite is used for backend and database functionality.<br/>
-Capacitor and ESbuild is used for building the iOS app.
+Unter der Suchleiste wird der Gesamtwert der Sammlung angezeigt. Dieser ergibt sich aus dem tagesaktuellen 30-Tage-Durchschnittswert einer Karte, welcher beim Hinzufügen der Karte in deine Sammlung von Cardmarket.com ermittelt wird (zu sehen unter der Karte, wenn man diese hinzufügt bzw. wenn man sich diese in der Tabelle anschaut).<br/>
+Da sich die Werte im Laufe der Zeit verändern, gibt es einen Button oben rechts in der App (📈), welcher alle vorhandenen Karten durchläuft und die tagesaktuellen Kartenpreise von Cardmarket.com zieht und in der Datenbank hinterlegt.
 
-### How to build and simulate app:
+#### 4. Link zu Pokéwiki.de
 
-1. download this repository
-2. ```npm install``` (optional)
+Ein Klick auf den Namen eines Pokémon in der Tabelle öffnet die Pokéwiki.de-Seite des ausgewählten Pokémons im Browser.
+
+#### 5. Karten zu deiner Pokémon TCG-Sammlung hinzufügen
+
+
+
+### Genutzte Technologien
+
+Das Gesamte Frontend der App basiert auf HTML, CSS und JavaScript.<br/>
+Für die Backend-Funktionalitäten wurde SQLite und Node.js genutzt.<br/>
+Um daraus eine iOS-App zu bauen, wurde Capacitor und ESBuild genutzt.<br/>
+Für das Laden der Pokémon-Sprites wird eine Schnittstelle zur PokeAPI genutzt.<br/>
+Die Bilder der TCG-Karten und zum Abrufen der Cardmarket-Preise wird eine Schnittstelle zur Pokémon TCG API genutzt.
+
+### How to:
+
+1. Lade das Repo herunter
+2. ```npm install```
 3. ```npm run build```
 4. ```npx cap sync```
 5. ```npx cap open ios```
 
-This builds the app and opens Xcode. From there you can simulate the app using the Xcode simualator.<br/>
-You can also enable developer mode on your iPhone to build the app on you phone. Xcode can guide you through configuring your iPhone.<br/>
+Das erstellt einen Build und öffnet die App in Xcode. Von dort aus kann man die App im Xcode Simulator testen.<br/>
+Du kannst stattdessen auch dein iPhone in den Entwicklermodus versetzen, um die App direkt in iOS zu testen. Xcode hilft dir bei der Einrichtung deines iPhones.<br/>
 > [!CAUTION]
-> Enabling developer mode reduces security measures on your device.
+> Das Aktivieren des Entwicklermodus kann das Sicherheitsniveau deines iPhones reduzieren.

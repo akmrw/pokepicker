@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div style="display:flex; flex-direction:column; align-items:center;">
                   <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                   <p style="margin-top:10px;">
-                    Variante: <strong>${variante}</strong><br>
+                    ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
                     30d-Wert: <strong>${preisText}</strong><br>
                     Hinzugefügt am: <strong>${hinzugefügtAm}
                   </p>
@@ -309,7 +309,12 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         
         const name = await getName(dex);
-        const engName = await getEngName(dex);
+        let engName = await getEngName(dex);
+
+        if (engName == "Nidoran♂") engName = "Nidoran ♂";
+        if (engName == "Nidoran♀") engName = "Nidoran ♀";
+        if (engName == "Sirfetch’d") engName = "Sirfetch'd";
+
         const cards = await fetchCards(engName);
     
         if (!cards || cards.length === 0) {
@@ -363,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
           html += `
             <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${name}')">
+              <div>ID: ${card.id}</div>
               <img src="${card.images.small}" alt="${name}">
               <div>${preisText}</div>
             </div>
@@ -410,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     async function fetchCards(engName) {
       try {
-        const url = `https://api.pokemontcg.io/v2/cards?q=name:${engName}&orderBy=-set.releaseDate`;
+        const url = `https://api.pokemontcg.io/v2/cards?q=name:"${engName}"&orderBy=-set.releaseDate`;
         const response = await Http.get({
           url: url,
           headers: {
@@ -584,6 +590,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function aktualisiereAllePreise() {
       const result = await db.query(`SELECT cardId FROM cards`);
       let aktualisiert = 0;
+      let current = 0;
+      let total = result.values.length;
     
       for (const row of result.values) {
         const cardId = row.cardId;
@@ -598,6 +606,11 @@ document.addEventListener("DOMContentLoaded", () => {
           await updatePrice(cardId, preis);
           aktualisiert++;
         }
+
+        current++;
+        const percent = Math.round((current / total) * 100);
+        const progressText = document.getElementById("progressText");
+        if (progressText) progressText.textContent = percent + "%";
       }
     
       alert(`${aktualisiert} Preise wurden aktualisiert.`);
