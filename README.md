@@ -1,6 +1,6 @@
-<img href="www/pokepicker_logo_transparent.png">
+![PokéPicker Logo.](/www/pokepicker_logo_transparent.png)
 
-# Poképicker
+# PokéPicker
 
 ## Eine iOS-App, mit der du deine PokémonTCG-Karten organisieren kannst.
 
