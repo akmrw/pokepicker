@@ -609,8 +609,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         current++;
         const percent = Math.round((current / total) * 100);
-        const progressText = document.getElementById("progressText");
-        if (progressText) progressText.textContent = percent + "%";
+        const updateProgress = document.getElementById("preiseAktualisierenProgress");
+        if (updateProgress) updateProgress.textContent = percent + "%";
       }
     
       alert(`${aktualisiert} Preise wurden aktualisiert.`);
