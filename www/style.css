@@ -276,3 +276,7 @@ button.closeGallery {
     border: none;
     cursor: pointer;
 }
+
+#trainerSortButtons {
+    padding-bottom: 10px;
+}

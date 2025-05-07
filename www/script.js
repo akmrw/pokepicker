@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     cardLoader.classList.add("shown");
     
     //SQLite-Datenbank-Initialisierung
-    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds, insertCard, getCardById, getCardsByIds, updatePrice } = await import("./db-init.js");
+    const { initDatabase, getDaten, getName, getEngName, getCardIds, updateCardIds, insertCard, getCardById, getCardsByIds, updatePrice, 
+      getTrainers, insertTrainer, getTrainerCardIds, getTrainerById } = await import("./db-init.js");
     db = await initDatabase();
 
     //Tabelle definieren
@@ -107,10 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
       const ids = cardIds.split(";").filter(id => id.trim());
       const cards = await getCardsByIds(ids.map(id => parseInt(id)));
+      // Karten nach avg30 absteigend sortieren
+      cards.sort((a, b) => (b.avg30 || 0) - (a.avg30 || 0));
+
       const fragment = document.createDocumentFragment();
 
       for (const card of cards) {
-        console.log("Geladene Karte:", card);  // DEBUG
         window.cachedCards[card.cardId] = card;
 
         const img = document.createElement("img");
@@ -420,6 +423,50 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error('Fehler beim Abrufen über HTTP:', error.message);
         return null;
       }
+    }
+
+    async function fetchAllTrainerCards(subtype) {
+      let allCards = [];
+      let page = 1;
+      let pageSize = 250;
+      let more = true;
+    
+      while (more) {
+        const url = `https://api.pokemontcg.io/v2/cards?q=supertype:Trainer subtypes:${subtype}&orderBy=name&page=${page}&pageSize=${pageSize}`;
+    
+        const response = await Http.get({
+          url,
+          headers: {
+            'Accept': 'application/json',
+            'X-Api-Key': config.API_KEY,
+            'Connection': 'close'
+          }
+        });
+    
+        if (response.status !== 200 || !response.data?.data?.length) {
+          more = false;
+          break;
+        }
+    
+        const cards = response.data.data;
+    
+        // Optional: avg30 ermitteln
+        for (const card of cards) {
+          const prices = card.cardmarket?.prices;
+          card.avg30 = prices?.avg30 ?? null;
+        }
+    
+        allCards = allCards.concat(cards);
+    
+        // Wenn weniger als pageSize zurückkam → keine weiteren Seiten
+        if (cards.length < pageSize) {
+          more = false;
+        } else {
+          page++;
+        }
+      }
+    
+      return allCards;
     }    
 
     async function fetchPrice(cardId) {
@@ -436,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
         if (response.status !== 200 || !response.data?.data?.length) {
           console.error("Fehler beim Abrufen der Karte:", response.status, response);
-          console.log("Response body:", response.data);
           return null;
         }
     
@@ -468,7 +514,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
       if (response.status !== 200) {
         console.error("Fehler beim Abrufen der Karte:", response.status, response);
-        console.log("Response body:", response.data);
         return;
       }      
     
@@ -487,11 +532,12 @@ document.addEventListener("DOMContentLoaded", () => {
           <h2>Karte hinzugefügt!</h2>
           <p>Du hast <strong>${name}</strong> (${cardId}) ausgewählt.</p>
           <br>
+          <p>Welche Variante möchtest du speichern?</p>
           <button class="overlayMenuBtn" id="btnBasic">Basic</button>
           <button class="overlayMenuBtn" id="btnReverse">Reverse</button>
           <button class="overlayMenuBtn" id="btnHolo">Holo</button>
           <br><br>
-          <button class="overlayMenuBtn" id="closeOverlayConfirm">OK</button>
+          <button class="overlayMenuBtn" id="closeOverlayConfirm">Überspringen</button>
         </div>
       `;
     
@@ -511,19 +557,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await updateCardIds(dex, cardIds);
 
         const container = document.getElementById(`kartenContainer_${dex}`);
-        const img = document.createElement("img");
-        img.src = cardData.images.small;
-        img.alt = cardId;
-        img.style.width = "50px";
-        img.style.height = "69px";
-        img.style.objectFit = "cover";
-    
-        img.addEventListener("click", async () => {
-          const ids = (await getCardIds(dex)).split(";").filter(id => id.trim());
-          openCardGallery(dex, ids.indexOf(cardDbId.toString()));
-        });
-    
-        container.appendChild(img);
+        container.innerHTML = ""; // Container leeren
+        await loadSavedCards(dex); // neu laden und korrekt einsortieren
     
         overlayElement.classList.add("hidden");
         overlayElement.classList.remove("shown");
@@ -543,10 +578,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function updateGesamtwert() {
       try {
-        const result = await db.query(`SELECT avg30 FROM cards WHERE avg30 IS NOT NULL`);
+        const cardResult = await db.query(`SELECT avg30 FROM cards WHERE avg30 IS NOT NULL`);
+        const trainerResult = await db.query(`SELECT avg30 FROM trainer WHERE avg30 IS NOT NULL`);
         let summe = 0;
     
-        for (const row of result.values) {
+        for (const row of cardResult.values) {
+          summe += row.avg30;
+        }
+
+        for (const row of trainerResult.values) {
           summe += row.avg30;
         }
     
@@ -564,10 +604,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     async function aktualisiereAllePreise() {
       const result = await db.query(`SELECT cardId FROM cards`);
+      const trainerResult = await db.query(`SELECT cardId FROM trainer`);
+    
       let aktualisiert = 0;
       let current = 0;
-      let total = result.values.length;
-
+      const total = result.values.length + trainerResult.values.length;
+    
       alert(`Aktualisierung von ${total} Preisen gestartet.`);
     
       for (const row of result.values) {
@@ -583,17 +625,39 @@ document.addEventListener("DOMContentLoaded", () => {
           await updatePrice(cardId, preis);
           aktualisiert++;
         }
-
+    
         current++;
         const percent = Math.round((current / total) * 100);
         const updateProgress = document.getElementById("preiseAktualisierenProgress");
         if (updateProgress) updateProgress.textContent = percent + "%";
       }
     
-      updateProgress.textContent = "";
+      for (const row of trainerResult.values) {
+        const cardId = row.cardId;
+    
+        let preis = await fetchPrice(cardId);
+        if (preis == null) {
+          const cleaned = cleanCardId(cardId);
+          preis = await fetchPrice(cleaned);
+        }
+    
+        if (preis != null) {
+          await db.run(`UPDATE trainer SET avg30 = ? WHERE cardId = ?`, [preis, cardId]);
+          aktualisiert++;
+        }
+    
+        current++;
+        const percent = Math.round((current / total) * 100);
+        const updateProgress = document.getElementById("preiseAktualisierenProgress");
+        if (updateProgress) updateProgress.textContent = percent + "%";
+      }
+    
+      const updateProgress = document.getElementById("preiseAktualisierenProgress");
+      if (updateProgress) updateProgress.textContent = "";
+      
       alert(`${aktualisiert} Preise wurden aktualisiert!`);
       updateGesamtwert();
-    }    
+    }      
 
     window.aktualisiereAllePreise = aktualisiereAllePreise;
 
@@ -795,6 +859,433 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       toggleFilter("shiny");
     });
+
+    window.zeigePokemonTabelle = function () {
+      document.getElementById("kartentabelle").classList.remove("hidden");
+      document.getElementById("trainertabelle").classList.add("hidden");
+    };
+    
+    window.zeigeTrainerTabelle = async function () {
+      document.getElementById("kartentabelle").classList.add("hidden");
+      document.getElementById("trainertabelle").classList.remove("hidden");
+    
+      const tbody = document.querySelector("#trainertabelle tbody");
+      tbody.innerHTML = "";
+    
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td><div id="trainerkartenContainer" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;"></div></td>`;
+      tbody.appendChild(tr);
+    
+      await loadTrainerCards();
+    };    
+
+    async function loadTrainerCards() {
+      const container = document.getElementById("trainerkartenContainer");
+      if (!container) {
+        console.warn("Container trainerkartenContainer nicht gefunden");
+        return;
+      }
+    
+      const trainers = await getTrainers();
+    
+      if (!trainers || !Array.isArray(trainers)) {
+        console.error("getTrainers() lieferte keine gültige Liste:", trainers);
+        return;
+      }
+    
+      trainers.sort((a, b) => (b.avg30 || 0) - (a.avg30 || 0));
+    
+      const fragment = document.createDocumentFragment();
+    
+      for (const trainer of trainers) {
+        window.cachedCards[trainer.cardId] = trainer;
+    
+        const img = document.createElement("img");
+        img.src = trainer.imageLow;
+        img.alt = trainer.cardId;
+        img.style.width = "50px";
+        img.style.height = "69px";
+        img.style.objectFit = "cover";
+        img.addEventListener("click", () => openTrainerCardGallery(trainer.id));
+    
+        fragment.appendChild(img);
+      }
+    
+      container.appendChild(fragment);
+    }    
+
+    window.openTrainerOverlay = async function (subType) {
+      const overlayElement = document.querySelector("#overlay");
+    
+      // Ladeanzeige
+      overlayElement.innerHTML = `
+        <div id="overlayContent">
+          <h2>Bitte warten...</h2>
+          <p>Karten werden geladen</p>
+          <div class="loader"></div>
+        </div>
+      `;
+
+      overlayElement.classList.remove("hidden");
+      overlayElement.classList.add("shown");
+    
+      try {
+        const cards = await fetchAllTrainerCards(subType);
+        if (!cards || cards.length === 0) {
+          overlayElement.innerHTML = `
+            <div id='overlayContent'>
+              <h2>Keine Karten gefunden.</h2> 
+              <button class="overlayMenuBtn" id="BackBtn">Schließen</button>
+            </div>
+          `;
+          document.getElementById("BackBtn").addEventListener("click", () => {
+            overlayElement.classList.add("hidden");
+            overlayElement.classList.remove("shown");
+            overlayElement.innerHTML = "";
+          });
+          return;
+        }
+    
+        let html = `
+          <div id="overlayContent">
+            <button class="closeGallery" id="BackBtn">X</button>
+            <h2>Kartenauswahl für<br><strong>${subType}</strong>:</h2>
+            <p>
+              Welche Karte möchtest du hinzufügen?<br>
+              <input type="text" id="nummerSuche" placeholder="Kartennummer eingeben…" onkeyup="filterTrainerCardsByNumber()">
+            </p>
+            <div class="kartenGrid">
+        `;
+    
+        for (const card of cards) {
+          const wert30d = card.avg30;
+          let preisText = "–";
+    
+          if (wert30d != null) {
+            const wert = wert30d.toFixed(2);
+            let farbe = "#DEDEDE";
+            let symbol = "🪙";
+            if (wert30d > 20) {
+              farbe = "#FF4444";
+              symbol = "🔥";
+            } else if (wert30d > 5) {
+              farbe = "#FFAA00";
+              symbol = "💰";
+            }
+    
+            preisText = `<span style="color:${farbe}; font-size:14px;">${symbol} ${wert}€</span>`;
+          }
+    
+          const nummer = card.id.split("-")[1]; // z. B. "123"
+
+          html += `
+            <div class="kartenItem" data-id="${card.id}" data-number="${nummer}" onclick="trainerKarteAuswählen('${card.id}')">
+              <div>ID: ${card.id}</div>
+              <img src="${card.images.small}" alt="${card.name}">
+              <div>${preisText}</div>
+            </div>
+          `;
+
+        }
+    
+        html += `
+            </div>
+          </div>
+        `;
+        overlayElement.innerHTML = html;
+    
+        document.getElementById("BackBtn").addEventListener("click", () => {
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+        });
+    
+      } catch (error) {
+        console.error(error);
+        overlayElement.innerHTML = `
+          <div id='overlayContent'>
+            <h2>Fehler beim Laden.</h2>
+            <button class="overlayMenuBtn" id="BackBtn">Schließen</button>
+          </div>`;
+        document.getElementById("BackBtn").addEventListener("click", () => {
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+        });
+      }
+    };
+
+    window.trainerKarteAuswählen = async function (cardId) {
+      const overlayElement = document.querySelector("#overlay");
+    
+      overlayElement.innerHTML = `<div id="overlayContent"><div class="loader"></div></div>`;
+      overlayElement.classList.remove("hidden");
+      overlayElement.classList.add("shown");
+    
+      try {
+        const response = await Http.get({
+          url: `https://api.pokemontcg.io/v2/cards/${cardId}`,
+          headers: {
+            'Accept': 'application/json',
+            'X-Api-Key': config.API_KEY,
+            'Connection': 'close'
+          }
+        });
+    
+        if (response.status !== 200) {
+          console.error("Fehler beim Abrufen der Karte:", response.status, response);
+          return;
+        }
+    
+        const cardData = response.data.data;
+        cardData.imageSmall = cardData.images?.small || null;
+        cardData.imageLarge = cardData.images?.large || null;
+    
+        const trainerDbId = await insertTrainer(cardData);
+        if (!trainerDbId) {
+          console.error("Keine ID von insertCard erhalten – Abbruch.");
+          return;
+        }
+    
+        // Schritt 1: Auswahl der Variante
+        overlayElement.innerHTML = `
+          <div id="overlayContent">
+            <h2>Karte hinzugefügt!</h2>
+            <p>Du hast <strong>${cardId}</strong> ausgewählt.</p>
+            <br>
+            <p>Welche Variante möchtest du speichern?</p>
+            <button class="overlayMenuBtn" id="btnBasic">Basic</button>
+            <button class="overlayMenuBtn" id="btnReverse">Reverse</button>
+            <button class="overlayMenuBtn" id="btnHolo">Holo</button>
+            <br><br>
+            <button class="overlayMenuBtn" id="closeOverlayConfirm">Überspringen</button>
+          </div>
+        `;
+    
+        async function finalizeTrainerSelection(variantType, trainerDbId) {        
+          overlayElement.innerHTML = `<div id="overlayContent"><div class="loader"></div></div>`;
+          overlayElement.classList.remove("hidden");
+          overlayElement.classList.add("shown");
+        
+          try {
+            if (variantType !== "none") {
+              await db.run(`UPDATE trainer SET ${variantType} = 1 WHERE id = ?`, [trainerDbId]);
+            }
+        
+            const container = document.getElementById("trainerkartenContainer");
+            container.innerHTML = "";
+            await loadTrainerCards();
+        
+          } catch (e) {
+            console.error("Fehler in finalizeTrainerSelection:", e.message, e);
+          }
+        
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+          await updateGesamtwert(); 
+        }        
+    
+        document.getElementById("btnBasic").addEventListener("click", () => finalizeTrainerSelection("basic", trainerDbId));
+        document.getElementById("btnReverse").addEventListener("click", () => finalizeTrainerSelection("reverse", trainerDbId));
+        document.getElementById("btnHolo").addEventListener("click", () => finalizeTrainerSelection("holo", trainerDbId));
+        document.getElementById("closeOverlayConfirm").addEventListener("click", () => finalizeTrainerSelection("none", trainerDbId));
+    
+      } catch (error) {
+        console.error("Fehler bei trainerKarteAuswählen:", error);
+        overlayElement.innerHTML = `
+          <div id="overlayContent">
+            <h2>Fehler beim Hinzufügen.</h2>
+            <p>${error.message}</p>
+            <button class="overlayMenuBtn" id="closeOverlayConfirm">Schließen</button>
+          </div>
+        `;
+        document.getElementById("closeOverlayConfirm").addEventListener("click", () => {
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+        });
+      }
+    };    
+
+    async function openTrainerCardGallery(startIndex) {
+      const overlayElement = document.querySelector("#overlay");
+      overlayElement.innerHTML = `<div id="overlayContent"><div class="loader"></div></div>`;
+      overlayElement.classList.remove("hidden");
+      overlayElement.classList.add("shown");
+    
+      let trainerIds = await getTrainerCardIds();  // ← jetzt ein Array
+    
+      if (!trainerIds || !trainerIds.length) {
+        overlayElement.classList.add("hidden");
+        overlayElement.classList.remove("shown");
+        return;
+      }
+    
+      let currentIndex = trainerIds.findIndex(id => id === startIndex);
+      if (currentIndex === -1) currentIndex = 0;
+    
+      async function showTrainerCard() {
+
+        const id = trainerIds[currentIndex];
+
+        try {
+          const trainer = await getTrainerById(id);
+          if (!trainer) {
+            throw new Error(`Trainerkarte mit ID ${id} wurde nicht gefunden.`);
+          }
+
+          let hinzugefügtAm = "Unbekannt";
+          if (trainer.addedAt) {
+            const datum = new Date(trainer.addedAt);
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            //const options = { day: '2-digit', month: '2-digit', year: 'numeric' }; // nur Datum, ohne Zeit
+            hinzugefügtAm = datum.toLocaleString('de-DE', options);
+          }
+
+          let variante = "Keine Angabe";
+
+          if (trainer.basic == 1) variante = "Basic";
+          if (trainer.reverse == 1) variante = "Reverse";
+          if (trainer.holo == 1) variante = "Holo";
+
+          // 🔁 Preis laden (mit Fallback)
+          let wert30d = await fetchPrice(trainer.cardId);
+          if (wert30d == null) {
+            const cleanedId = cleanCardId(trainer.cardId);
+            wert30d = await fetchPrice(cleanedId);
+          }
+
+          // 💶 Preis formatieren oder Ersatz anzeigen
+          let preisText = "–";
+          if (wert30d != null) {
+            const wert = wert30d.toFixed(2);
+            let farbe = "#DEDEDE"; // Standard grau
+            let symbol = "🪙";      // Günstig
+
+            if (wert30d > 20) {
+              farbe = "#FF4444";
+              symbol = "🔥";
+            } else if (wert30d > 5) {
+              farbe = "#FFAA00";
+              symbol = "💰";
+            }
+
+            preisText = `<span style="color:${farbe};">${symbol} ${wert}€</span>`;
+          }
+          
+          overlayElement.innerHTML = `
+            <div id="overlayContent">
+            <button class="closeGallery" id="closeGallery">X</button>
+              <h2>Karte ansehen</h2>
+              <div style="display:flex; align-items:center; justify-content:center;">
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                  <img src="${trainer.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
+                  <p style="margin-top:10px;">
+                    ID: ${trainer.cardId} | Variante: <strong>${variante}</strong><br>
+                    30d-Wert: <strong>${preisText}</strong><br>
+                    Hinzugefügt am: <strong>${hinzugefügtAm}
+                  </p>
+                </div>
+              </div>
+              <button id="prevTrainer" style="font-size:24px;">⬅️</button>
+              <button id="nextTrainer" style="font-size:24px;">➡️</button>
+              <br><br>
+              <button id="deleteTrainer">❌ Karte löschen</button>
+            </div>
+          `;    
+    
+          document.getElementById("prevTrainer").addEventListener("click", () => {
+            currentIndex = (currentIndex - 1 + trainerIds.length) % trainerIds.length;
+            showTrainerCard();
+          });
+
+          document.getElementById("nextTrainer").addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % trainerIds.length;
+            showTrainerCard();
+          });
+    
+          document.getElementById("deleteTrainer").addEventListener("click", async () => {
+            if (confirm("Willst du diese Karte wirklich löschen?")) {
+              const dbId = trainerIds[currentIndex]; // das ist die Karten-ID in der DB
+          
+              // 1. Karte aus cards-Tabelle löschen
+              await db.run(`DELETE FROM trainer WHERE id = ?`, [dbId]);
+          
+              // 2. Galerie und Container neu laden
+              overlayElement.classList.add("hidden");
+              overlayElement.classList.remove("shown");
+              overlayElement.innerHTML = "";
+          
+              const container = document.getElementById(`trainerkartenContainer`);
+              container.innerHTML = "";
+              loadTrainerCards();
+              updateGesamtwert();
+            }
+          });
+    
+          document.getElementById("closeGallery").addEventListener("click", () => {
+            overlayElement.classList.add("hidden");
+            overlayElement.classList.remove("shown");
+            overlayElement.innerHTML = "";
+          });
+    
+        } catch (error) {
+          console.error("Fehler beim Anzeigen der Trainerkarte:", error?.message || error, error);
+          overlayElement.classList.add("hidden");
+          overlayElement.classList.remove("shown");
+          overlayElement.innerHTML = "";
+        }
+      }
+    
+      showTrainerCard();
+    }
+
+    document.getElementById("sort-name").addEventListener("click", () => {
+      sortTrainerCards("name")
+    });
+
+    document.getElementById("sort-addedAt").addEventListener("click", () => {
+      sortTrainerCards("addedAt")
+    });
+
+    document.getElementById("sort-avg30").addEventListener("click", () => {
+      sortTrainerCards("avg30")
+    });
+
+    window.sortTrainerCards = function (sortKey) {
+      const container = document.getElementById("trainerkartenContainer");
+      const cardElems = Array.from(container.querySelectorAll("img"));
+    
+      const cards = cardElems.map(img => window.cachedCards[img.alt]).filter(Boolean);
+    
+      cards.sort((a, b) => {
+        if (sortKey === "name") return a.cardName.localeCompare(b.cardName);
+        if (sortKey === "addedAt") return new Date(b.addedAt) - new Date(a.addedAt);
+        if (sortKey === "avg30") return (b.avg30 || 0) - (a.avg30 || 0);
+        return 0;
+      });
+    
+      container.innerHTML = "";
+      cards.forEach(card => {
+        const img = document.createElement("img");
+        img.src = card.imageLow;
+        img.alt = card.cardId;
+        img.style.width = "50px";
+        img.style.height = "69px";
+        img.style.objectFit = "cover";
+        img.addEventListener("click", () => openTrainerCardGallery(1, 0)); // oder Index ermitteln
+        container.appendChild(img);
+      });
+    };    
+
+    window.filterTrainerCardsByNumber = function () {
+      const value = document.getElementById("nummerSuche").value.trim();
+      document.querySelectorAll(".kartenItem").forEach(item => {
+        const number = item.dataset.number;
+        item.style.display = number && number.startsWith(value) ? "block" : "none";
+      });
+    };    
 
     /* async function updateCardNameForExistingCards() {
       const { values: cards } = await db.query("SELECT id, cardId FROM cards WHERE cardName IS NULL OR cardName = ''");

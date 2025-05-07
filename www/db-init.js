@@ -10,6 +10,7 @@ export async function initDatabase() {
   //Tabellen löschen, falls vorhanden (NUR FÜR DEVENV, NICHT PROD)
   //await db.execute(`DROP TABLE IF EXISTS pokemon`);
   //await db.execute(`DROP TABLE IF EXISTS cards`);
+  //await db.execute(`DROP TABLE IF EXISTS trainer`);
   
   //Spalte cardName hinzufügen
   //await db.execute(`ALTER TABLE cards ADD COLUMN cardName TEXT`);
@@ -22,6 +23,24 @@ export async function initDatabase() {
       name TEXT,
       engName TEXT,
       cardIds TEXT
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS trainer (
+      id INTEGER PRIMARY KEY,
+      cardId TEXT,
+      rarity TEXT,
+      setName TEXT,
+      basic INTEGER DEFAULT 0,
+      reverse INTEGER DEFAULT 0,
+      holo INTEGER DEFAULT 0,
+      addedAt TEXT,
+      imageLow TEXT,
+      imageHigh TEXT,
+      cardName TEXT,
+      subTypes TEXT,
+      avg30 REAL
     );
   `);
 
@@ -1159,4 +1178,49 @@ export async function updatePrice(cardId, avg30) {
   } catch (error) {
     console.error(`Fehler beim Speichern von avg30 für ${cardId}:`, error.message);
   }
+}
+
+export async function getTrainers() {
+  const result = await db.query(`SELECT * FROM trainer`);
+  return result.values;
+}
+
+export async function insertTrainer(cardData) {
+  try {
+
+    const imageLow = typeof cardData.imageSmall === 'string' ? cardData.imageSmall : null;
+    const imageHigh = typeof cardData.imageLarge === 'string' ? cardData.imageLarge : null;
+
+    const result = await db.run(
+      `INSERT INTO trainer (cardId, cardName, rarity, setName, imageLow, imageHigh, subTypes, addedAt, avg30)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        cardData.id,
+        cardData.name,
+        cardData.rarity || '',
+        cardData.set?.name || '',
+        imageLow,
+        imageHigh,
+        Array.isArray(cardData.subtypes) ? cardData.subtypes.join(", ") : '',
+        new Date().toISOString(),
+        cardData.cardmarket?.prices?.avg30 ?? null
+      ]
+    );
+
+    return result.changes?.lastId || null;
+
+  } catch (error) {
+    console.error("Fehler in insertCard():", error.message || error, cardData?.id || "unbekannte Karte");
+    return null;
+  }
+}
+
+export async function getTrainerById(id) {
+  const result = await db.query(`SELECT * FROM trainer WHERE id = ?`, [id]);
+  return result.values?.[0] || null;
+}
+
+export async function getTrainerCardIds() {
+  const result = await db.query(`SELECT id FROM trainer`);
+  return result.values.map(row => row.id);
 }

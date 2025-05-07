@@ -46,6 +46,10 @@
             <div id="cardLoader" class="hidden">
                 <!-- Hier wird Content per Script eingefügt -->
             </div>
+            <div id="tableToggle" style="text-align:center; margin-top:20px;">
+                <button onclick="zeigePokemonTabelle()">Pokémon</button>
+                <button onclick="zeigeTrainerTabelle()">Trainer</button>
+            </div>
             <p id="gesamtwert" style="text-align: center; font-size: 18px; margin-top: 20px;">Gesamtwert: 🪙 0.00€</p>
             <table id="kartentabelle">
                 <thead>
@@ -57,6 +61,27 @@
                 </thead>
                 <tbody>
                     <!-- Hier werden die Zeilen per Script eingefügt -->
+                </tbody>
+            </table>
+            <div id="trainerSortButtons" class="search">
+                <label>Sortieren nach:</label>
+                <a href="#" id="sort-name">Name</a> |
+                <a href="#" id="sort-addedAt">Hinzugefügt</a> |
+                <a href="#" id="sort-avg30">Wert</a>
+            </div>
+            <table id="trainertabelle" class="hidden">
+                <thead>
+                  <tr>
+                    <th>
+                      Karten<br>
+                      <button onclick="openTrainerOverlay('Supporter')">+ Unterstützer</button>
+                      <button onclick="openTrainerOverlay('Item')">+ Item</button>
+                      <button onclick="openTrainerOverlay('Stadium')">+ Stadion</button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <!-- Wird per Script gefüllt -->
                 </tbody>
             </table>
         </article>
