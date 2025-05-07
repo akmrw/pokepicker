@@ -64,6 +64,14 @@ td {
     width: 250px;
 }
 
+#th_trainer, #th_energie {
+    width: 100px;
+}
+
+#th_trainerKarten, #th_energieKarten {
+    width: 300px;
+} 
+
 td.dexnr,
 td.pokemon {
     text-align: center;
@@ -275,8 +283,4 @@ button.closeGallery {
     color: #DEDEDE;
     border: none;
     cursor: pointer;
-}
-
-#trainerSortButtons {
-    padding-bottom: 10px;
 }

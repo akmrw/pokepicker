@@ -11,6 +11,7 @@ export async function initDatabase() {
   //await db.execute(`DROP TABLE IF EXISTS pokemon`);
   //await db.execute(`DROP TABLE IF EXISTS cards`);
   //await db.execute(`DROP TABLE IF EXISTS trainer`);
+  //await db.execute(`DROP TABLE IF EXISTS energy`);
   
   //Spalte cardName hinzufügen
   //await db.execute(`ALTER TABLE cards ADD COLUMN cardName TEXT`);
@@ -28,6 +29,24 @@ export async function initDatabase() {
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS trainer (
+      id INTEGER PRIMARY KEY,
+      cardId TEXT,
+      rarity TEXT,
+      setName TEXT,
+      basic INTEGER DEFAULT 0,
+      reverse INTEGER DEFAULT 0,
+      holo INTEGER DEFAULT 0,
+      addedAt TEXT,
+      imageLow TEXT,
+      imageHigh TEXT,
+      cardName TEXT,
+      subTypes TEXT,
+      avg30 REAL
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS energy (
       id INTEGER PRIMARY KEY,
       cardId TEXT,
       rarity TEXT,
@@ -1210,7 +1229,7 @@ export async function insertTrainer(cardData) {
     return result.changes?.lastId || null;
 
   } catch (error) {
-    console.error("Fehler in insertCard():", error.message || error, cardData?.id || "unbekannte Karte");
+    console.error("Fehler in insertTrainer():", error.message || error, cardData?.id || "unbekannte Karte");
     return null;
   }
 }
@@ -1223,4 +1242,49 @@ export async function getTrainerById(id) {
 export async function getTrainerCardIds() {
   const result = await db.query(`SELECT id FROM trainer`);
   return result.values.map(row => row.id);
+}
+
+export async function getEnergies() {
+  const result = await db.query(`SELECT * FROM energy`);
+  return result.values;
+}
+
+export async function insertEnergie(cardData) {
+  try {
+
+    const imageLow = typeof cardData.imageSmall === 'string' ? cardData.imageSmall : null;
+    const imageHigh = typeof cardData.imageLarge === 'string' ? cardData.imageLarge : null;
+
+    const result = await db.run(
+      `INSERT INTO energy (cardId, cardName, rarity, setName, imageLow, imageHigh, subTypes, addedAt, avg30)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        cardData.id,
+        cardData.name,
+        cardData.rarity || '',
+        cardData.set?.name || '',
+        imageLow,
+        imageHigh,
+        Array.isArray(cardData.subtypes) ? cardData.subtypes.join(", ") : '',
+        new Date().toISOString(),
+        cardData.cardmarket?.prices?.avg30 ?? null
+      ]
+    );
+
+    return result.changes?.lastId || null;
+
+  } catch (error) {
+    console.error("Fehler in insertEnergie():", error.message || error, cardData?.id || "unbekannte Karte");
+    return null;
+  }
+}
+
+export async function getEnergieCardIds() {
+  const result = await db.query(`SELECT id FROM energy`);
+  return result.values.map(row => row.id);
+}
+
+export async function getEnergieById(id) {
+  const result = await db.query(`SELECT * FROM energy WHERE id = ?`, [id]);
+  return result.values?.[0] || null;
 }

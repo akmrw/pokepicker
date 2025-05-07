@@ -49,12 +49,13 @@
             <div id="tableToggle" style="text-align:center; margin-top:20px;">
                 <button onclick="zeigePokemonTabelle()">Pokémon</button>
                 <button onclick="zeigeTrainerTabelle()">Trainer</button>
+                <button onclick="zeigeEnergieTabelle()">Energie</button>
             </div>
             <p id="gesamtwert" style="text-align: center; font-size: 18px; margin-top: 20px;">Gesamtwert: 🪙 0.00€</p>
             <table id="kartentabelle">
                 <thead>
                     <tr>
-                        <th id="th_dex">Dex-Nr.</th>
+                        <th id="th_dex">Dex-<br>Nr.</th>
                         <th id="th_pokemon">Pokémon<br><span id="eintragsAnzahl">(0)</span></th>
                         <th id="th_karten">Karten<br><span id="kartenAnzahl">(0)</span></th>
                     </tr>
@@ -63,21 +64,22 @@
                     <!-- Hier werden die Zeilen per Script eingefügt -->
                 </tbody>
             </table>
-            <div id="trainerSortButtons" class="search">
-                <label>Sortieren nach:</label>
-                <a href="#" id="sort-name">Name</a> |
-                <a href="#" id="sort-addedAt">Hinzugefügt</a> |
-                <a href="#" id="sort-avg30">Wert</a>
-            </div>
             <table id="trainertabelle" class="hidden">
                 <thead>
                   <tr>
-                    <th>
-                      Karten<br>
-                      <button onclick="openTrainerOverlay('Supporter')">+ Unterstützer</button>
-                      <button onclick="openTrainerOverlay('Item')">+ Item</button>
-                      <button onclick="openTrainerOverlay('Stadium')">+ Stadion</button>
-                    </th>
+                    <th id="th_trainer">Trainer-<br>Art</th>
+                    <th id="th_trainerKarten">Karten</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <!-- Wird per Script gefüllt -->
+                </tbody>
+            </table>
+            <table id="energietabelle" class="hidden">
+                <thead>
+                  <tr>
+                    <th id="th_energie">Energie-<br>Art</th>
+                    <th id="th_energieKarten">Karten</th>
                   </tr>
                 </thead>
                 <tbody>
