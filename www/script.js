@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.querySelector("#kartentabelle tbody");
 
     window.cachedCards = {};
+    window.cachedPokemonCardsByName = {};
+    window.cachedTrainerCardsByType = {};
+    window.cachedEnergyCardsByType = {};
+
     let current = 0;
     const total = data.values.length;
 
@@ -294,7 +298,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (engName == "Nidoran♀") engName = "Nidoran ♀";
         if (engName == "Sirfetch’d") engName = "Sirfetch'd";
 
-        const cards = await fetchCards(engName);
+        let cards = window.cachedPokemonCardsByName[engName];
+        if (!cards) {
+          cards = await fetchCards(engName);
+          if (cards) {
+            window.cachedPokemonCardsByName[engName] = cards;
+          }
+        }
     
         if (!cards || cards.length === 0) {
           overlayElement.innerHTML = `
@@ -527,6 +537,9 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Keine ID von insertCard erhalten – Abbruch.");
         return;
       }
+
+      cardData.id = cardDbId;
+      window.cachedCards[cardData.cardId] = cardData;
     
       overlayElement.innerHTML = `
         <div id="overlayContent">
@@ -930,6 +943,16 @@ document.addEventListener("DOMContentLoaded", () => {
         </td>
       `;
       tbody.appendChild(trStadium);
+
+      const trTool = document.createElement("tr");
+      trTool.innerHTML = `
+        <td>Ausrüstung</td>
+        <td>
+          <div id="toolContainer" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;"></div>
+          <button onclick="openTrainerOverlay('Tool')">+ Ausrüstung</button>
+        </td>
+      `;
+      tbody.appendChild(trTool);
     
       await loadTrainerCards();
     };
@@ -938,6 +961,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const supporterContainer = document.getElementById("supporterContainer");
       const itemContainer = document.getElementById("itemContainer");
       const stadiumContainer = document.getElementById("stadiumContainer");
+      const toolContainer = document.getElementById("toolContainer");
       
       const trainers = await getTrainers();
     
@@ -951,7 +975,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const supporterFragment = document.createDocumentFragment();
       const itemFragment = document.createDocumentFragment();
       const stadiumFragment = document.createDocumentFragment();
-    
+      const toolFragment = document.createDocumentFragment();
+      
       for (const trainer of trainers) {
         window.cachedCards[trainer.cardId] = trainer;
     
@@ -967,11 +992,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (trainer.subTypes?.toLowerCase().includes("supporter")) supporterFragment.appendChild(img);
         else if (trainer.subTypes?.toLowerCase().includes("item")) itemFragment.appendChild(img);
         else if (trainer.subTypes?.toLowerCase().includes("stadium")) stadiumFragment.appendChild(img);
+        else if (trainer.subTypes?.toLowerCase().includes("tool")) toolFragment.appendChild(img);
       }
     
       supporterContainer.appendChild(supporterFragment);
       itemContainer.appendChild(itemFragment);
       stadiumContainer.appendChild(stadiumFragment);
+      toolContainer.appendChild(toolFragment);
       
     } 
 
@@ -991,7 +1018,15 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayElement.classList.add("shown");
     
       try {
-        const cards = await fetchAllTrainerCards(subType);
+        
+        let cards = window.cachedTrainerCardsByType[subType];
+        if (!cards) {
+          cards = await fetchAllTrainerCards(subType);
+          if (cards) {
+            window.cachedTrainerCardsByType[subType] = cards;
+          }
+        }
+
         if (!cards || cards.length === 0) {
           overlayElement.innerHTML = `
             <div id='overlayContent'>
@@ -1151,6 +1186,9 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Keine ID von insertCard erhalten – Abbruch.");
           return;
         }
+
+        cardData.id = trainerDbId;
+        window.cachedCards[cardData.cardId] = cardData; 
     
         // Schritt 1: Auswahl der Variante
         overlayElement.innerHTML = `
@@ -1183,6 +1221,8 @@ document.addEventListener("DOMContentLoaded", () => {
             itemContainer.innerHTML = "";
             const stadiumContainer = document.getElementById("stadiumContainer");
             stadiumContainer.innerHTML = "";
+            const toolContainer = document.getElementById("toolContainer");
+            toolContainer.innerHTML = "";
             await loadTrainerCards();
         
           } catch (e) {
@@ -1237,7 +1277,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const subtype = card.subTypes?.toLowerCase() || "";
         const match = (filterSubType === "supporter" && subtype.includes("supporter")) ||
                       (filterSubType === "item" && subtype.includes("item")) ||
-                      (filterSubType === "stadium" && subtype.includes("stadium"));
+                      (filterSubType === "stadium" && subtype.includes("stadium")) ||
+                      (filterSubType === "tool" && subtype.includes("tool"));
     
         if (match) {
           filteredIds.push(id);
@@ -1289,7 +1330,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.innerHTML = `
           <div id="overlayContent">
             <button class="closeGallery" id="closeGallery">X</button>
-            <h2>Energie-Karte ansehen</h2>
+            <h2>Trainer-Karte ansehen</h2>
             <div style="display:flex; align-items:center; justify-content:center;">
               <div style="display:flex; flex-direction:column; align-items:center;">
                 <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
@@ -1320,28 +1361,27 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("deleteTrainer").addEventListener("click", async () => {
           if (confirm("Willst du diese Karte wirklich löschen?")) {
             await db.run(`DELETE FROM trainer WHERE id = ?`, [id]);
-            filteredIds.splice(currentIndex, 1);
-            
+        
+            // Overlay schließen
+            overlayElement.classList.add("hidden");
+            overlayElement.classList.remove("shown");
+            overlayElement.innerHTML = "";
+        
+            // Tabelle neu laden
             const supporterContainer = document.getElementById("supporterContainer");
             const itemContainer = document.getElementById("itemContainer");
             const stadiumContainer = document.getElementById("stadiumContainer");
-            supporterContainer.innerHTML = "";
-            itemContainer.innerHTML = "";
-            stadiumContainer.innerHTML = "";
-            await loadEnergieCards();
+            const toolContainer = document.getElementById("toolContainer"); // optional, je nach Struktur
+        
+            if (supporterContainer) supporterContainer.innerHTML = "";
+            if (itemContainer) itemContainer.innerHTML = "";
+            if (stadiumContainer) stadiumContainer.innerHTML = "";
+            if (toolContainer) toolContainer.innerHTML = "";
+        
+            await loadTrainerCards();
             await updateGesamtwert();
-        
-            if (filteredIds.length === 0) {
-              overlayElement.classList.add("hidden");
-              overlayElement.classList.remove("shown");
-              overlayElement.innerHTML = "";
-              return;
-            }
-        
-            currentIndex %= filteredIds.length;
-            showTrainerCard();
           }
-        });        
+        });              
     
         document.getElementById("closeGallery").addEventListener("click", () => {
           overlayElement.classList.add("hidden");
@@ -1445,7 +1485,15 @@ document.addEventListener("DOMContentLoaded", () => {
       overlayElement.classList.add("shown");
     
       try {
-        const cards = await fetchAllEnergieCards(subType);
+
+        let cards = window.cachedEnergyCardsByType[subType];
+        if (!cards) {
+          cards = await fetchAllEnergieCards(subType);
+          if (cards) {
+            window.cachedEnergyCardsByType[subType] = cards;
+          }
+        }
+
         if (!cards || cards.length === 0) {
           overlayElement.innerHTML = `
             <div id='overlayContent'>
@@ -1605,6 +1653,9 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Keine ID von insertCard erhalten – Abbruch.");
           return;
         }
+
+        cardData.id = energieDbId;
+        window.cachedCards[cardData.cardId] = cardData; 
     
         // Schritt 1: Auswahl der Variante
         overlayElement.innerHTML = `
@@ -1770,27 +1821,28 @@ document.addEventListener("DOMContentLoaded", () => {
     
         document.getElementById("deleteEnergie").addEventListener("click", async () => {
           if (confirm("Willst du diese Karte wirklich löschen?")) {
-            await db.run(`DELETE FROM energy WHERE id = ?`, [id]);
-            filteredIds.splice(currentIndex, 1);
-
-            const basicContainer = document.getElementById("basisEnergieContainer");
-            const spezialContainer = document.getElementById("spezialEnergieContainer");
-            basicContainer.innerHTML = "";
-            spezialContainer.innerHTML = "";
-            await loadEnergieCards();
-            await updateGesamtwert();
+            try {
+              await db.run(`DELETE FROM energy WHERE id = ?`, [id]);
         
-            if (filteredIds.length === 0) {
+              // Overlay schließen
               overlayElement.classList.add("hidden");
               overlayElement.classList.remove("shown");
               overlayElement.innerHTML = "";
-              return;
-            }
         
-            currentIndex %= filteredIds.length;
-            showEnergieCard();
+              // Tabelle neu aufbauen
+              const basicContainer = document.getElementById("basisEnergieContainer");
+              const spezialContainer = document.getElementById("spezialEnergieContainer");
+              if (basicContainer) basicContainer.innerHTML = "";
+              if (spezialContainer) spezialContainer.innerHTML = "";
+              await loadEnergieCards();
+              await updateGesamtwert();
+        
+            } catch (err) {
+              console.error("Fehler beim Löschen der Energie-Karte:", err);
+              alert("Beim Löschen ist ein Fehler aufgetreten.");
+            }
           }
-        });        
+        });               
     
         document.getElementById("closeGallery").addEventListener("click", () => {
           overlayElement.classList.add("hidden");
