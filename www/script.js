@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
           overlayElement.innerHTML = `
             <div id="overlayContent">
             <button class="closeGallery" id="closeGallery">X</button>
-              <h2>Karte ansehen</h2>
+              <h2>Pokémon</h2>
               <div style="display:flex; align-items:center; justify-content:center;">
                 <div style="display:flex; flex-direction:column; align-items:center;">
                   <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
@@ -253,22 +253,10 @@ document.addEventListener("DOMContentLoaded", () => {
                   </p>
                 </div>
               </div>
-              <button id="prevCard" style="font-size:24px;">⬅️</button>
-              <button id="nextCard" style="font-size:24px;">➡️</button>
-              <br><br>
+              <br>
               <button id="deleteCard">❌ Karte löschen</button>
             </div>
-          `;    
-    
-          document.getElementById("prevCard").addEventListener("click", () => {
-            currentIndex = (currentIndex - 1 + ids.length) % ids.length;
-            showCard();
-          });
-    
-          document.getElementById("nextCard").addEventListener("click", () => {
-            currentIndex = (currentIndex + 1) % ids.length;
-            showCard();
-          });
+          `;
     
           document.getElementById("deleteCard").addEventListener("click", async () => {
             if (confirm("Willst du diese Karte wirklich löschen?")) {
@@ -1371,7 +1359,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.innerHTML = `
           <div id="overlayContent">
             <button class="closeGallery" id="closeGallery">X</button>
-            <h2>Trainer-Karte ansehen</h2>
+            <h2>Trainer</h2>
             <div style="display:flex; align-items:center; justify-content:center;">
               <div style="display:flex; flex-direction:column; align-items:center;">
                 <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
@@ -1382,22 +1370,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </p>
               </div>
             </div>
-            <button id="prevTrainer">⬅️</button>
-            <button id="nextTrainer">➡️</button>
-            <br><br>
+            <br>
             <button id="deleteTrainer">❌ Karte löschen</button>
           </div>
         `;
-    
-        document.getElementById("prevTrainer").addEventListener("click", () => {
-          currentIndex = (currentIndex - 1 + filteredIds.length) % filteredIds.length;
-          showTrainerCard();
-        });
-    
-        document.getElementById("nextTrainer").addEventListener("click", () => {
-          currentIndex = (currentIndex + 1) % filteredIds.length;
-          showTrainerCard();
-        });
     
         document.getElementById("deleteTrainer").addEventListener("click", async () => {
           if (confirm("Willst du diese Karte wirklich löschen?")) {
@@ -1820,7 +1796,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.innerHTML = `
           <div id="overlayContent">
             <button class="closeGallery" id="closeGallery">X</button>
-            <h2>Energie-Karte ansehen</h2>
+            <h2>Energie</h2>
             <div style="display:flex; align-items:center; justify-content:center;">
               <div style="display:flex; flex-direction:column; align-items:center;">
                 <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
@@ -1831,22 +1807,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </p>
               </div>
             </div>
-            <button id="prevEnergie">⬅️</button>
-            <button id="nextEnergie">➡️</button>
-            <br><br>
+            <br>
             <button id="deleteEnergie">❌ Karte löschen</button>
           </div>
         `;
-    
-        document.getElementById("prevEnergie").addEventListener("click", () => {
-          currentIndex = (currentIndex - 1 + filteredIds.length) % filteredIds.length;
-          showEnergieCard();
-        });
-    
-        document.getElementById("nextEnergie").addEventListener("click", () => {
-          currentIndex = (currentIndex + 1) % filteredIds.length;
-          showEnergieCard();
-        });
     
         document.getElementById("deleteEnergie").addEventListener("click", async () => {
           if (confirm("Willst du diese Karte wirklich löschen?")) {
