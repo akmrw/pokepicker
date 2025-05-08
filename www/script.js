@@ -916,14 +916,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 300); // Muss mit der CSS-Transition-Zeit übereinstimmen
     }
 
+    function zeigeTabelle(id) {
+      const tabellen = ["kartentabelle", "trainertabelle", "energietabelle"];
+      tabellen.forEach(t => {
+        const el = document.getElementById(t);
+        if (el) {
+          if (t === id) {
+            el.classList.remove("hidden");
+          } else {
+            el.classList.add("hidden");
+          }
+        }
+      });
+    }
+
     window.zeigePokemonTabelle = function () {
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTablePokemon").classList.add("active");
       document.getElementById("pokemonFilterContainer").style.display = "block";
 
-      document.getElementById("kartentabelle").classList.remove("hidden");
-      document.getElementById("trainertabelle").classList.add("hidden");
-      document.getElementById("energietabelle").classList.add("hidden");
+      zeigeTabelle("kartentabelle");
 
     };
     
@@ -933,9 +945,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.getElementById("pokemonFilterContainer").style.display = "none";
 
-      document.getElementById("kartentabelle").classList.add("hidden");
-      document.getElementById("trainertabelle").classList.remove("hidden");
-      document.getElementById("energietabelle").classList.add("hidden");
+      zeigeTabelle("trainertabelle");
 
       const tbody = document.querySelector("#trainertabelle tbody");
       tbody.innerHTML = "";
@@ -1434,9 +1444,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.getElementById("pokemonFilterContainer").style.display = "none";
       
-      document.getElementById("kartentabelle").classList.add("hidden");
-      document.getElementById("trainertabelle").classList.add("hidden");
-      document.getElementById("energietabelle").classList.remove("hidden");
+      zeigeTabelle("energietabelle");
     
       const tbody = document.querySelector("#energietabelle tbody");
       tbody.innerHTML = "";
