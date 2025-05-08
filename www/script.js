@@ -817,49 +817,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateNavStyles() {
-      const reverseBtn = document.getElementById("filter-reverse");
-      const holoBtn = document.getElementById("filter-holo");
-      const vBtn = document.getElementById("filter-v");
-      const vmaxBtn = document.getElementById("filter-vmax");
-      const exBtn = document.getElementById("filter-ex");
-      const shinyBtn = document.getElementById("filter-shiny");
+      const filterTypes = ['reverse', 'holo', 'v', 'vmax', 'ex', 'shiny'];
     
-      reverseBtn.className = filterStates.reverse === "positive"
-        ? "active-positive"
-        : filterStates.reverse === "negative"
-        ? "active-negative"
-        : "";
+      for (const type of filterTypes) {
+        const btn = document.getElementById(`filter-${type}`);
+        if (!btn) continue;
     
-      holoBtn.className = filterStates.holo === "positive"
-        ? "active-positive"
-        : filterStates.holo === "negative"
-        ? "active-negative"
-        : "";
+        btn.classList.remove('active-positive', 'active-negative');
     
-      vBtn.className = filterStates.v === "positive"
-        ? "active-positive"
-        : filterStates.v === "negative"
-        ? "active-negative"
-        : "";
-    
-      vmaxBtn.className = filterStates.vmax === "positive"
-        ? "active-positive"
-        : filterStates.vmax === "negative"
-        ? "active-negative"
-        : "";
-    
-      exBtn.className = filterStates.ex === "positive"
-        ? "active-positive"
-        : filterStates.ex === "negative"
-        ? "active-negative"
-        : "";
-    
-      shinyBtn.className = filterStates.shiny === "positive"
-        ? "active-positive"
-        : filterStates.shiny === "negative"
-        ? "active-negative"
-        : "";
-    }
+        if (filterStates[type] === 'positive') {
+          btn.classList.add('active-positive');
+        } else if (filterStates[type] === 'negative') {
+          btn.classList.add('active-negative');
+        }
+        // bei neutral → keine Klasse nötig (bleibt grau)
+      }
+    }            
 
     document.getElementById("filter-alle").addEventListener("click", (e) => {
       e.preventDefault();
@@ -910,6 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTablePokemon").classList.add("active");
+      document.getElementById("pokemonFilterContainer").style.display = "block";
 
     };
     
@@ -917,6 +891,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("kartentabelle").classList.add("hidden");
       document.getElementById("trainertabelle").classList.remove("hidden");
       document.getElementById("energietabelle").classList.add("hidden");
+
+      document.getElementById("pokemonFilterContainer").style.display = "none";
 
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTableTrainer").classList.add("active");
@@ -926,7 +902,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
       const trSupporter = document.createElement("tr");
       trSupporter.innerHTML = `
-        <td>Unterstützer</td>
+        <td>Unter-<br>stützer</td>
         <td>
           <div id="supporterContainer" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;"></div>
           <button onclick="openTrainerOverlay('Supporter')">+ Unterstützer</button>
@@ -956,7 +932,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const trTool = document.createElement("tr");
       trTool.innerHTML = `
-        <td>Ausrüstung</td>
+        <td>Ausrüs-<br>tung</td>
         <td>
           <div id="toolContainer" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;"></div>
           <button onclick="openTrainerOverlay('Tool')">+ Ausrüstung</button>
@@ -1430,6 +1406,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("kartentabelle").classList.add("hidden");
       document.getElementById("trainertabelle").classList.add("hidden");
       document.getElementById("energietabelle").classList.remove("hidden");
+
+      document.getElementById("pokemonFilterContainer").style.display = "none";
 
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTableEnergie").classList.add("active");

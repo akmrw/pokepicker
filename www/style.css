@@ -44,12 +44,33 @@ a:visited {
     text-decoration: none;
 }
 
-table,
-th,
-td {
-    border: 1px solid;
+table {
+    width: 95%;
+    max-width: 900px;
     border-collapse: collapse;
-    padding: 15px;
+    margin: 20px auto;
+    background-color: #222;
+    color: #DEDEDE;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,174,255,0.4);
+}
+
+th, td {
+    border: 1px solid #444;
+    padding: 12px;
+    text-align: center;
+}
+
+thead {
+    background-color: #111;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #2a2a2a;
 }
 
 #th_dex {
@@ -77,19 +98,45 @@ td.pokemon {
     text-align: center;
 }
 
-#search {
-    width: 200px;
-    margin-left: 10px;
+#pokemonFilterContainer {
+    margin-top: 20px;
     text-align: center;
+    background-color: #222;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-div.search {
-    text-align: center;
-    margin-top: 15px;
+#pokemonFilterContainer input#search {
+    padding: 6px 15px;
+    border-radius: 6px;
+    border: none;
+    background-color: #333;
+    color: #DEDEDE;
+    font-size: 14px;
 }
 
-label[for=search] {
+#pokemonFilterContainer nav a {
+    padding: 6px 10px;
+    margin: 5px;
+    background-color: #333; /* neutral grau */
+    color: #DEDEDE;
+    border-radius: 6px;
+    text-decoration: none;
     display: inline-block;
+    font-size: 14px;
+}
+
+#pokemonFilterContainer nav a.active-positive {
+    background-color: #00AEFF; /* blau */
+    color: black;
+}
+
+#pokemonFilterContainer nav a.active-negative {
+    background-color: #FF4444; /* rot */
+    color: white;
 }
 
 table {
@@ -107,14 +154,6 @@ th {
 
 .shown {
     display: flex;
-}
-
-nav a.active-positive {
-    color: green;
-}
-
-nav a.active-negative {
-    color: red;
 }
 
 #cardLoader {
