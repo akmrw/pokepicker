@@ -31,6 +31,12 @@
             <!-- Hier wird Content per Script eingefügt -->
         </div>
 
+        <div id="tableToggle" style="text-align:center; margin-top:20px;">
+            <button id="showTablePokemon" onclick="zeigePokemonTabelle()">Pokémon</button>
+            <button id="showTableTrainer" onclick="zeigeTrainerTabelle()">Trainer</button>
+            <button id="showTableEnergie" onclick="zeigeEnergieTabelle()">Energie</button>
+        </div>
+
         <div id="pokemonFilterContainer">
             <nav>
                 <a href="#" id="filter-alle" class="filter-button">Alle</a>
@@ -47,11 +53,7 @@
                 <input type="text" id="search" name="search" onkeyup="searchTable()" placeholder="Pokédex-Nr. oder Name..">
             </div>
         </div>
-        <div id="tableToggle" style="text-align:center; margin-top:20px;">
-            <button id="showTablePokemon" onclick="zeigePokemonTabelle()">Pokémon</button>
-            <button id="showTableTrainer" onclick="zeigeTrainerTabelle()">Trainer</button>
-            <button id="showTableEnergie" onclick="zeigeEnergieTabelle()">Energie</button>
-        </div>
+
         <div id="gesamtwertBox">
             <span id="gesamtwert">0.00€</span>
         </div>
