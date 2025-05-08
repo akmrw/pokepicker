@@ -6,7 +6,12 @@
 
 ### Features der App (von oben nach unten)
 
-#### 1. Filter (nur in Pokémon-Tabelle)
+#### 1. Auswahl der verschiedenen Karten-Tabellen
+
+Du kannst in der App nicht nur die Karten der Pokémon hinzufügen, sondern auch Trainer- und Energie-Karten.<br/>
+Dafür gibt es in der App eine Unterteilung in drei verschiedene Tabellen:
+
+#### 2. Filter (nur in Pokémon-Tabelle)
 
 Die Buttons im oberen Teil der App können genutzt werden, um die Kartentabelle nach deinen Wünschen zu filtern:
 
@@ -28,16 +33,10 @@ Jeder dieser Filter hat drei Regelstufen (mit Ausnahme von "Alle"):
 
 Diese Filter lassen sich beliebig kombinieren. So lassen sich Filter einstellen, die einem bspw. alle Pokémon zeigen, bei denen noch keine Reverse- und Holo-Karten, dafür jedoch ex-Karten hinterlegt sind.
 
-#### 2. Suche (nur in Pokémon-Tabelle)
+#### 3. Suche (nur in Pokémon-Tabelle)
 
 Wenn du ein spezielles Pokémon aus der Tabelle heraussuchen möchtest, kannst du dafür die Suchleiste nutzen. Trage hierfür in der Suchleiste einfach den Namen des Pokémons oder seine entsprechende Pokédex-Nummer ein. Zum Beispiel bringen die Suchanfragen für "Schiggy" und "0007" dasselbe Ergebnis.<br/>
 Wenn du die Pokédex-Nummer für die Suche verwendest empfehle ich dir, wie im Beispiel zu sehen, die führenden Nullen anzugeben. Andernfalls könnten die Ergebnisse etwas unerwartet sein, da die Logik alle Pokémon zeigt, in dessen Pokédex-Nummer eine 7 vorkommt (0007, 0017, 0027, 0037, 0047 usw.).
-
-#### 3. Auswahl der verschiedenen Karten-Tabellen
-
-Du kannst in der App nicht nur die Karten der Pokémon hinzufügen, sondern auch Trainer- und Energie-Karten.<br/>
-Dafür gibt es in der App eine Unterteilung in drei verschiedene Tabellen:
-
 
 1. Pokémon: Hier kannst du für jedes einzelne Pokémon separat Karten hinzufügen.<br/>
 2. Trainer: Hier kannst du Unterstützer-, Item-, Stadion- und Pokémon-Ausrüstungskarten hinzufügen.<br/>
