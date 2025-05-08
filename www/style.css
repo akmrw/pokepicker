@@ -1,29 +1,4 @@
-/* Seitenstruktur */
-
-header {
-    margin-top: 75px;
-    text-align: center;
-}
-
-header img {
-    text-align: center;
-    max-height: 100px;
-}
-
-nav {
-    text-align: center;
-}
-
-nav a {
-    margin-left: 15px;
-    margin-right: 15px;
-}
-
-footer {
-    text-align: center;
-}
-
-/* Elemente */
+/* ===== Seitenstruktur ===== */
 
 body {
     font-family: "Saira", sans-serif;
@@ -32,17 +7,34 @@ body {
     background-color: black;
 }
 
+header {
+    margin-top: 75px;
+    text-align: center;
+}
+
+header img {
+    max-height: 100px;
+}
+
+nav {
+    text-align: center;
+}
+
+nav a {
+    margin: 0 15px;
+}
+
+footer {
+    text-align: left;
+    margin: 30px 0 0 10px;
+}
+
 a {
     color: #00AEFF;
-}
-
-a:link {
     text-decoration: none;
 }
 
-a:visited {
-    text-decoration: none;
-}
+/* ===== Tabellen ===== */
 
 table {
     width: 95%;
@@ -52,11 +44,11 @@ table {
     background-color: #222;
     color: #DEDEDE;
     border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0,174,255,0.4);
+    box-shadow: 0 0 10px rgba(0, 174, 255, 0.4);
 }
 
-th, td {
+th,
+td {
     border: 1px solid #444;
     padding: 12px;
     text-align: center;
@@ -85,28 +77,42 @@ tbody tr:nth-child(even) {
     width: 250px;
 }
 
-#th_trainer, #th_energie {
+#th_trainer,
+#th_energie {
     width: 100px;
 }
 
-#th_trainerKarten, #th_energieKarten {
+#th_trainerKarten,
+#th_energieKarten {
     width: 300px;
-} 
+}
+
+/* Karten-Container in Tabellen */
+
+td > div[id^="kartenContainer_"],
+td > div[id$="Container"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
 
 td.dexnr,
 td.pokemon {
     text-align: center;
 }
 
+/* ===== Filterbereich ===== */
+
 #pokemonFilterContainer {
-    margin-top: 20px;
+    font-size: 16px;
+    margin: 20px auto 0;
     text-align: center;
     background-color: #222;
     padding: 10px;
     border-radius: 10px;
     max-width: 90%;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 #pokemonFilterContainer input#search {
@@ -115,46 +121,34 @@ td.pokemon {
     border: none;
     background-color: #333;
     color: #DEDEDE;
-    font-size: 14px;
 }
 
 #pokemonFilterContainer .search {
-    margin-top: 15px; /* Abstand von den Filtern */
+    margin-top: 15px;
     text-align: center;
 }
 
 #pokemonFilterContainer nav a {
     padding: 6px 10px;
     margin: 5px;
-    background-color: #333; /* neutral grau */
+    background-color: #333;
     color: #DEDEDE;
     border-radius: 6px;
-    text-decoration: none;
     display: inline-block;
-    font-size: 14px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #pokemonFilterContainer nav a.active-positive {
-    background-color: #00AEFF; /* blau */
+    background-color: #00AEFF;
     color: black;
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #pokemonFilterContainer nav a.active-negative {
-    background-color: #FF4444; /* rot */
+    background-color: #FF4444;
     color: white;
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-table {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-th {
-    text-align: center;
-}
+/* ===== Sichtbarkeit ===== */
 
 .hidden {
     display: none !important;
@@ -167,27 +161,26 @@ th {
     display: flex;
 }
 
+/* ===== Karten-Loader ===== */
+
 #cardLoader {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    font-family: "Saira", sans-serif;
+    background: #333;
     color: #DEDEDE;
-    background: #333333;
     text-align: center;
-    max-width: 100%;
     border-radius: 8px;
-    margin-bottom: 20px;
-    margin-top: 20px;
+    margin: 20px auto;
+    max-width: 100%;
     opacity: 1;
     transition: opacity 0.5s ease;
 }
 
 #cardLoader.hidden {
     opacity: 0;
-    pointer-events: none;   /* verhindert Interaktion */
+    pointer-events: none;
     height: 0;
     margin: 0;
     padding: 0;
@@ -197,8 +190,7 @@ th {
 #loaderText {
     font-size: 16px;
     min-width: 110px;
-    margin-right: 5px;
-    margin-left: 15px;
+    margin: 0 5px 0 15px;
 }
 
 #progressText {
@@ -212,16 +204,33 @@ th {
     height: 20px;
     background-color: #555;
     border-radius: 10px;
-    margin: 10px auto 10px;
+    margin: 10px auto;
     overflow: hidden;
-  }
-  
+}
+
 #progressBar {
     height: 100%;
     width: 0%;
     background-color: #00AEFF;
     transition: width 0.1s ease;
 }
+
+/* ===== Gesamtwert-Box ===== */
+
+#gesamtwertBox {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #00AEFF;
+    color: #000;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 174, 255, 0.5);
+    z-index: 999;
+}
+
+/* ===== Overlay & Galerie ===== */
 
 #overlay {
     position: fixed;
@@ -234,35 +243,78 @@ th {
     align-items: flex-start;
     overflow-y: auto;
     z-index: 1000;
-    padding-top: 100px;
-    padding-bottom: 100px;
+    padding: 100px 0;
     box-sizing: border-box;
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
-/* Inhalt des Overlays */
+#overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
 #overlayContent {
-    font-family: "Saira", sans-serif;
-    color: #DEDEDE;
-    background: #333333;
+    background: rgba(34, 34, 34, 0.95);
+    backdrop-filter: blur(8px);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     text-align: center;
-    max-width: 600px; /* neu */
-    margin: 0 auto; /* neu */
+    max-width: 600px;
+    margin: 0 auto;
+    color: #DEDEDE;
+    box-shadow: 0 0 20px rgba(0, 174, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideFadeIn 0.3s ease;
+    font-family: "Saira", sans-serif;
 }
 
 #overlayContent img {
-    border-radius: 8px;
-    box-shadow: 0 0 10px #00AEFF;
-}  
-
-.overlayMenuBtn {
-    font-family: "Saira", sans-serif;
-    font-size: 16px;
-    margin-bottom: 10px;
-    margin-left: 2px;
-    margin-right: 2px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 174, 255, 0.5);
+    border: 2px solid rgba(0, 174, 255, 0.2);
+    max-width: 300px;
+    margin-bottom: 15px;
 }
+
+#overlayContent p {
+    margin: 10px 0;
+    text-align: center;
+    color: #ccc;
+    font-size: 14px;
+}
+
+button.closeGallery {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    background: none;
+    color: #DEDEDE;
+    border: none;
+    cursor: pointer;
+}
+
+.overlayMenuBtn,
+button.closeGallery {
+    background-color: #222;
+    color: #DEDEDE;
+    border: 1px solid #00AEFF;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 5px;
+    font-size: 14px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+.overlayMenuBtn:hover,
+button.closeGallery:hover {
+    background-color: #00AEFF;
+    color: black;
+}
+
+/* ===== Karten-Gitter ===== */
 
 .kartenGrid {
     display: flex;
@@ -281,7 +333,6 @@ th {
 }
 
 .kartenItem img {
-    /* Seitenverhältnis 8:11 */
     width: 150px;
     height: 207px;
     object-fit: cover;
@@ -290,7 +341,9 @@ th {
 .kartenItem div {
     margin-top: 5px;
     font-size: 14px;
-  }  
+}
+
+/* ===== Lade-Spinner ===== */
 
 .loader {
     border: 8px solid #f3f3f3;
@@ -303,48 +356,27 @@ th {
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes slideFadeIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
     }
-
-    100% {
-        transform: rotate(360deg);
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }
 
-button.closeGallery {
-    position: absolute;
-    top: 110px;
-    right: 20px;
-    font-size: 24px;
-    background: none;
-    color: #DEDEDE;
-    border: none;
-    cursor: pointer;
-} 
-
-#preiseAktualisieren {
-    position: absolute;
-    top: 80px;
-    right: 0px;
-    font-size: 24px;
-    background: none;
-    color: #DEDEDE;
-    border: none;
-    cursor: pointer;
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-#preiseAktualisierenProgress {
-    position: absolute;
-    top: 82px;
-    right: 35px;
-    font-size: 16px;
-    text-align: right;
-    background: none;
-    color: #DEDEDE;
-    border: none;
-    cursor: pointer;
-}
+/* ===== Tabellen-Umschaltung ===== */
 
 #tableToggle button {
     font-family: "Saira", sans-serif;
@@ -365,3 +397,27 @@ button.closeGallery {
     font-weight: bold;
 }
 
+/* ===== Preis-Update Button ===== */
+
+#preiseAktualisieren {
+    position: absolute;
+    top: 80px;
+    right: 0;
+    font-size: 24px;
+    background: none;
+    color: #DEDEDE;
+    border: none;
+    cursor: pointer;
+}
+
+#preiseAktualisierenProgress {
+    position: absolute;
+    top: 82px;
+    right: 35px;
+    font-size: 16px;
+    background: none;
+    color: #DEDEDE;
+    border: none;
+    cursor: pointer;
+    text-align: right;
+}

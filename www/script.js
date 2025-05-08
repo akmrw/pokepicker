@@ -187,8 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const ids = cardIds.split(";").filter(id => id.trim() !== "");
     
       if (ids.length === 0) {
-        overlayElement.classList.add("hidden");
-        overlayElement.classList.remove("shown");
+        fadeOutOverlay();
         return;
       }
     
@@ -283,9 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
               await updateCardIds(dex, ids.join(";") + ";");
           
               // 3. Galerie und Container neu laden
-              overlayElement.classList.add("hidden");
-              overlayElement.classList.remove("shown");
-              overlayElement.innerHTML = "";
+              fadeOutOverlay();
           
               const container = document.getElementById(`kartenContainer_${dex}`);
               container.innerHTML = "";
@@ -296,16 +293,20 @@ document.addEventListener("DOMContentLoaded", () => {
           });
     
           document.getElementById("closeGallery").addEventListener("click", () => {
-            overlayElement.classList.add("hidden");
-            overlayElement.classList.remove("shown");
-            overlayElement.innerHTML = "";
+            const overlay = document.getElementById("overlay");
+            overlay.classList.add("fade-out");
+        
+            // Warte auf das Ende der Transition, dann ausblenden
+            setTimeout(() => {
+                overlay.classList.remove("shown", "fade-out");
+                overlay.classList.add("hidden");
+                overlay.innerHTML = "";
+            }, 300); // entspricht der transition-duration
           });
     
         } catch (error) {
           console.error("Fehler beim Anzeigen der Karte:", error);
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         }
       }
     
@@ -355,9 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           document.getElementById("BackBtn").addEventListener("click", e => {
             e.preventDefault();
-            overlayElement.classList.add("hidden");
-            overlayElement.classList.remove("shown");
-            overlayElement.innerHTML = "";
+            fadeOutOverlay();
           });
 
           return;
@@ -412,9 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
         document.getElementById("BackBtn").addEventListener("click", e => {
           e.preventDefault();
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
     
       } catch (error) {
@@ -427,9 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("BackBtn").addEventListener("click", e => {
           e.preventDefault();
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
 
       }
@@ -613,9 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = ""; // Container leeren
         await loadSavedCards(dex); // neu laden und korrekt einsortieren
     
-        overlayElement.classList.add("hidden");
-        overlayElement.classList.remove("shown");
-        overlayElement.innerHTML = "";
+        fadeOutOverlay();
 
         updateEintragsAnzahl();
         updateKartenAnzahl();
@@ -912,6 +905,17 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleFilter("shiny");
     });
 
+    function fadeOutOverlay() {
+      const overlay = document.getElementById("overlay");
+      overlay.classList.add("fade-out");
+    
+      setTimeout(() => {
+        overlay.classList.remove("shown", "fade-out");
+        overlay.classList.add("hidden");
+        overlay.innerHTML = "";
+      }, 300); // Muss mit der CSS-Transition-Zeit übereinstimmen
+    }
+
     window.zeigePokemonTabelle = function () {
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTablePokemon").classList.add("active");
@@ -1072,9 +1076,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
           document.getElementById("BackBtn").addEventListener("click", () => {
-            overlayElement.classList.add("hidden");
-            overlayElement.classList.remove("shown");
-            overlayElement.innerHTML = "";
+            e.preventDefault();
+            fadeOutOverlay();
           });
           return;
         }
@@ -1128,9 +1131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.innerHTML = html;
     
         document.getElementById("BackBtn").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
     
       } catch (error) {
@@ -1141,9 +1142,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="overlayMenuBtn" id="BackBtn">Schließen</button>
           </div>`;
         document.getElementById("BackBtn").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
       }
     };
@@ -1266,9 +1265,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Fehler in finalizeTrainerSelection:", e.message, e);
           }
         
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
           await updateGesamtwert(); 
         }        
     
@@ -1287,9 +1284,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `;
         document.getElementById("closeOverlayConfirm").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
       }
     };
@@ -1324,8 +1319,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     
       if (!filteredIds.length) {
-        overlayElement.classList.add("hidden");
-        overlayElement.classList.remove("shown");
+        fadeOutOverlay();
         return;
       }
     
@@ -1400,9 +1394,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await db.run(`DELETE FROM trainer WHERE id = ?`, [id]);
         
             // Overlay schließen
-            overlayElement.classList.add("hidden");
-            overlayElement.classList.remove("shown");
-            overlayElement.innerHTML = "";
+            fadeOutOverlay();
         
             // Tabelle neu laden
             const supporterContainer = document.getElementById("supporterContainer");
@@ -1421,9 +1413,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });              
     
         document.getElementById("closeGallery").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
       }
     
@@ -1544,9 +1534,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
           document.getElementById("BackBtn").addEventListener("click", () => {
-            overlayElement.classList.add("hidden");
-            overlayElement.classList.remove("shown");
-            overlayElement.innerHTML = "";
+            fadeOutOverlay();
           });
           return;
         }
@@ -1600,9 +1588,7 @@ document.addEventListener("DOMContentLoaded", () => {
         overlayElement.innerHTML = html;
     
         document.getElementById("BackBtn").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
     
       } catch (error) {
@@ -1613,9 +1599,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="overlayMenuBtn" id="BackBtn">Schließen</button>
           </div>`;
         document.getElementById("BackBtn").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
       }
     };
@@ -1734,9 +1718,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Fehler in finalizeEnergieSelection:", e.message, e);
           }
         
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
           await updateGesamtwert(); 
         }        
     
@@ -1755,9 +1737,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `;
         document.getElementById("closeOverlayConfirm").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
       }
     };
@@ -1790,8 +1770,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     
       if (!filteredIds.length) {
-        overlayElement.classList.add("hidden");
-        overlayElement.classList.remove("shown");
+        fadeOutOverlay();
         return;
       }
     
@@ -1867,9 +1846,7 @@ document.addEventListener("DOMContentLoaded", () => {
               await db.run(`DELETE FROM energy WHERE id = ?`, [id]);
         
               // Overlay schließen
-              overlayElement.classList.add("hidden");
-              overlayElement.classList.remove("shown");
-              overlayElement.innerHTML = "";
+              fadeOutOverlay();
         
               // Tabelle neu aufbauen
               const basicContainer = document.getElementById("basisEnergieContainer");
@@ -1887,9 +1864,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });               
     
         document.getElementById("closeGallery").addEventListener("click", () => {
-          overlayElement.classList.add("hidden");
-          overlayElement.classList.remove("shown");
-          overlayElement.innerHTML = "";
+          fadeOutOverlay();
         });
       }
     

@@ -52,7 +52,9 @@
             <button id="showTableTrainer" onclick="zeigeTrainerTabelle()">Trainer</button>
             <button id="showTableEnergie" onclick="zeigeEnergieTabelle()">Energie</button>
         </div>
-        <p id="gesamtwert" style="text-align: center; font-size: 18px; margin-top: 20px;">Gesamtwert: 🪙 0.00€</p>
+        <div id="gesamtwertBox">
+            <span id="gesamtwert">0.00€</span>
+        </div>
         <table id="kartentabelle">
             <thead>
                 <tr>
@@ -94,9 +96,7 @@
         </div>
 
         <footer>
-            <p>
-                <a href="mailto:alex@kmrw.de">Kontakt</a>
-            </p>
+            <a href="mailto:alex@kmrw.de">Kontakt</a>
         </footer>
 
         <script type="module" src="build/script.js"></script>
