@@ -1,4 +1,4 @@
-![PokéPicker Logo.](/www/pokepicker_logo_transparent.png)
+<img src="https://raw.githubusercontent.com/akmrw/pokepicker/refs/heads/main/www/pokepicker_logo_transparent.png" width="300"> 
 
 # PokéPicker
 
