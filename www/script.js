@@ -79,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateKartenAnzahl();
     updateGesamtwert();
 
+    document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
+    document.getElementById("showTablePokemon").classList.add("active");
+
     //Aktualisieren der gezeigten Anzahl der Tabellen-Einträge
     function updateEintragsAnzahl() {
       const rows = document.querySelectorAll("#kartentabelle tbody tr");
@@ -904,12 +907,19 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("kartentabelle").classList.remove("hidden");
       document.getElementById("trainertabelle").classList.add("hidden");
       document.getElementById("energietabelle").classList.add("hidden");
+
+      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
+      document.getElementById("showTablePokemon").classList.add("active");
+
     };
     
     window.zeigeTrainerTabelle = async function () {
       document.getElementById("kartentabelle").classList.add("hidden");
       document.getElementById("trainertabelle").classList.remove("hidden");
       document.getElementById("energietabelle").classList.add("hidden");
+
+      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
+      document.getElementById("showTableTrainer").classList.add("active");
     
       const tbody = document.querySelector("#trainertabelle tbody");
       tbody.innerHTML = "";
@@ -1420,6 +1430,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("kartentabelle").classList.add("hidden");
       document.getElementById("trainertabelle").classList.add("hidden");
       document.getElementById("energietabelle").classList.remove("hidden");
+
+      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
+      document.getElementById("showTableEnergie").classList.add("active");
     
       const tbody = document.querySelector("#energietabelle tbody");
       tbody.innerHTML = "";
