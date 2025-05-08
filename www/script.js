@@ -71,9 +71,45 @@ document.addEventListener("DOMContentLoaded", () => {
     progressBar.style.width = "100%";
     progressText.textContent = "100%";
 
-    cardLoader.classList.add("hidden");
-    cardLoader.classList.remove("shown");
-    cardLoader.innerHTML = "";
+    // 1. Höhe des CardLoaders messen
+    const loaderHeight = cardLoader.offsetHeight;
+
+    // 2. Placeholder erzeugen mit identischem Style & Inhalt
+    const placeholder = document.createElement("div");
+    placeholder.style.height = loaderHeight + "px";
+    placeholder.style.backgroundColor = "#333";
+    placeholder.style.borderRadius = "8px";
+    placeholder.style.display = "flex";
+    placeholder.style.alignItems = "center";
+    placeholder.style.justifyContent = "center";
+    placeholder.style.color = "#DEDEDE";
+    placeholder.style.fontFamily = '"Saira", sans-serif';
+    placeholder.style.marginBottom = '20px';
+    placeholder.style.marginTop = '20px';
+    placeholder.style.gap = '10px';
+    placeholder.innerHTML = `
+      <p id="loaderText">Lade Karten…</p>
+      <div id="progressBarContainer" style="width: 100%; max-width: 400px; height: 20px; background-color: #555; border-radius: 10px; margin: 10px auto;">
+        <div id="progressBar" style="height: 100%; width: 100%; background-color: #00AEFF;"></div>
+      </div>
+      <div id="progressText" style="min-width: 40px; margin-right: 15px;">100%</div>
+    `;
+
+    // 3. Ersetze den echten Loader durch den Platzhalter
+    cardLoader.replaceWith(placeholder);
+
+    // 4. Nach kurzem Delay Höhe langsam auf 0px reduzieren
+    setTimeout(() => {
+      placeholder.style.transition = "height 0.5s ease, opacity 0.5s ease";
+      placeholder.style.height = "0px";
+      placeholder.style.opacity = "0";
+      placeholder.style.overflow = "hidden";
+    }, 100);
+
+    // 5. Danach aus dem DOM entfernen
+    setTimeout(() => {
+      placeholder.remove();
+    }, 700);
 
     updateEintragsAnzahl();
     updateKartenAnzahl();
@@ -877,26 +913,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.zeigePokemonTabelle = function () {
-      document.getElementById("kartentabelle").classList.remove("hidden");
-      document.getElementById("trainertabelle").classList.add("hidden");
-      document.getElementById("energietabelle").classList.add("hidden");
-
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTablePokemon").classList.add("active");
       document.getElementById("pokemonFilterContainer").style.display = "block";
 
+      document.getElementById("kartentabelle").classList.remove("hidden");
+      document.getElementById("trainertabelle").classList.add("hidden");
+      document.getElementById("energietabelle").classList.add("hidden");
+
     };
     
     window.zeigeTrainerTabelle = async function () {
+      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
+      document.getElementById("showTableTrainer").classList.add("active");
+
+      document.getElementById("pokemonFilterContainer").style.display = "none";
+
       document.getElementById("kartentabelle").classList.add("hidden");
       document.getElementById("trainertabelle").classList.remove("hidden");
       document.getElementById("energietabelle").classList.add("hidden");
 
-      document.getElementById("pokemonFilterContainer").style.display = "none";
-
-      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
-      document.getElementById("showTableTrainer").classList.add("active");
-    
       const tbody = document.querySelector("#trainertabelle tbody");
       tbody.innerHTML = "";
     
@@ -1403,14 +1439,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }; 
     
     window.zeigeEnergieTabelle = async function () {
+      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
+      document.getElementById("showTableEnergie").classList.add("active");
+
+      document.getElementById("pokemonFilterContainer").style.display = "none";
+      
       document.getElementById("kartentabelle").classList.add("hidden");
       document.getElementById("trainertabelle").classList.add("hidden");
       document.getElementById("energietabelle").classList.remove("hidden");
-
-      document.getElementById("pokemonFilterContainer").style.display = "none";
-
-      document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
-      document.getElementById("showTableEnergie").classList.add("active");
     
       const tbody = document.querySelector("#energietabelle tbody");
       tbody.innerHTML = "";

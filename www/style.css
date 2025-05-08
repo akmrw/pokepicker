@@ -118,6 +118,11 @@ td.pokemon {
     font-size: 14px;
 }
 
+#pokemonFilterContainer .search {
+    margin-top: 15px; /* Abstand von den Filtern */
+    text-align: center;
+}
+
 #pokemonFilterContainer nav a {
     padding: 6px 10px;
     margin: 5px;
@@ -127,16 +132,19 @@ td.pokemon {
     text-decoration: none;
     display: inline-block;
     font-size: 14px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #pokemonFilterContainer nav a.active-positive {
     background-color: #00AEFF; /* blau */
     color: black;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #pokemonFilterContainer nav a.active-negative {
     background-color: #FF4444; /* rot */
     color: white;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 table {
@@ -149,7 +157,10 @@ th {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .shown {
@@ -170,6 +181,17 @@ th {
     border-radius: 8px;
     margin-bottom: 20px;
     margin-top: 20px;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+#cardLoader.hidden {
+    opacity: 0;
+    pointer-events: none;   /* verhindert Interaktion */
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 #loaderText {
