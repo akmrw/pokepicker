@@ -986,13 +986,28 @@ document.addEventListener("DOMContentLoaded", () => {
         img.style.width = "50px";
         img.style.height = "69px";
         img.style.objectFit = "cover";
-        const subtype = trainer.subTypes?.toLowerCase() || "";
+        
+        let subtype = "";
+        if (Array.isArray(trainer.subTypes)) {
+          if (trainer.subTypes.some(s => s.toLowerCase().includes("supporter"))) subtype = "supporter";
+          else if (trainer.subTypes.some(s => s.toLowerCase().includes("item"))) subtype = "item";
+          else if (trainer.subTypes.some(s => s.toLowerCase().includes("stadium"))) subtype = "stadium";
+          else if (trainer.subTypes.some(s => s.toLowerCase().includes("tool"))) subtype = "tool";
+        } else if (typeof trainer.subTypes === "string") {
+          const s = trainer.subTypes.toLowerCase();
+          if (s.includes("supporter")) subtype = "supporter";
+          else if (s.includes("item")) subtype = "item";
+          else if (s.includes("stadium")) subtype = "stadium";
+          else if (s.includes("tool")) subtype = "tool";
+        }
+
         img.addEventListener("click", () => openTrainerCardGallery(trainer.id, subtype));
 
-        if (trainer.subTypes?.toLowerCase().includes("supporter")) supporterFragment.appendChild(img);
-        else if (trainer.subTypes?.toLowerCase().includes("item")) itemFragment.appendChild(img);
-        else if (trainer.subTypes?.toLowerCase().includes("stadium")) stadiumFragment.appendChild(img);
-        else if (trainer.subTypes?.toLowerCase().includes("tool")) toolFragment.appendChild(img);
+
+        if (subtype == "supporter") supporterFragment.appendChild(img);
+        if (subtype == "item") itemFragment.appendChild(img);
+        if (subtype == "stadium") stadiumFragment.appendChild(img);
+        if (subtype == "tool") toolFragment.appendChild(img);
       }
     
       supporterContainer.appendChild(supporterFragment);
