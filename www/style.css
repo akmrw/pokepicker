@@ -115,7 +115,13 @@ td.pokemon {
     max-width: 90%;
 }
 
+#pokemonFilterContainer label {
+    margin-right: 10px; /* Abstand zum Input-Feld */
+    font-size: 16px;
+}
+
 #pokemonFilterContainer input#search {
+    font-size: 16px;
     padding: 6px 15px;
     border-radius: 6px;
     border: none;
@@ -378,7 +384,17 @@ button.closeGallery:hover {
 
 /* ===== Tabellen-Umschaltung ===== */
 
+#tableToggle {
+    max-width: 900px;
+    width: 95%;
+    margin: 20px auto 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
 #tableToggle button {
+    width: 100%;
     font-family: "Saira", sans-serif;
     font-size: 16px;
     background-color: #222;
@@ -386,7 +402,6 @@ button.closeGallery:hover {
     border: 1px solid #00AEFF;
     border-radius: 6px;
     padding: 10px 20px;
-    margin: 5px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
 }
