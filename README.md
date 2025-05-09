@@ -11,7 +11,7 @@
 Du kannst in der App nicht nur die Karten der Pokémon hinzufügen, sondern auch Trainer- und Energie-Karten.<br/>
 Dafür gibt es in der App eine Unterteilung in drei verschiedene Tabellen:
 
-#### 2. Filter (nur in Pokémon-Tabelle)
+#### 2. Filter
 
 Die Buttons im oberen Teil der App können genutzt werden, um die Kartentabelle nach deinen Wünschen zu filtern:
 
@@ -33,7 +33,7 @@ Jeder dieser Filter hat drei Regelstufen (mit Ausnahme von "Alle"):
 
 Diese Filter lassen sich beliebig kombinieren. So lassen sich Filter einstellen, die einem bspw. alle Pokémon zeigen, bei denen noch keine Reverse- und Holo-Karten, dafür jedoch ex-Karten hinterlegt sind.
 
-#### 3. Suche (nur in Pokémon-Tabelle)
+#### 3. Suche
 
 Wenn du ein spezielles Pokémon aus der Tabelle heraussuchen möchtest, kannst du dafür die Suchleiste nutzen. Trage hierfür in der Suchleiste einfach den Namen des Pokémons oder seine entsprechende Pokédex-Nummer ein. Zum Beispiel bringen die Suchanfragen für "Schiggy" und "0007" dasselbe Ergebnis.<br/>
 Wenn du die Pokédex-Nummer für die Suche verwendest empfehle ich dir, wie im Beispiel zu sehen, die führenden Nullen anzugeben. Andernfalls könnten die Ergebnisse etwas unerwartet sein, da die Logik alle Pokémon zeigt, in dessen Pokédex-Nummer eine 7 vorkommt (0007, 0017, 0027, 0037, 0047 usw.).
@@ -57,8 +57,8 @@ Mit einem Klick auf eine bereits hinzugefügte Karte in der Tabelle wird die Det
 
 #### 6. Kartenwert (powered by Cardmarket.com)
 
-Am unteren rechten Bildschirmrand wird der Gesamtwert deiner Sammlung angezeigt. Dieser ergibt sich aus dem tagesaktuellen 30-Tage-Durchschnittswert einer Karte, welcher beim Hinzufügen der Karte in deine Sammlung von Cardmarket.com ermittelt wird (zu sehen unter der Karte, wenn man diese hinzufügt bzw. wenn man sich diese in der Tabelle anschaut). Dabei werden alle Karten aus allen drei Tabellen berücksichtigt.<br/>
-Da sich die Werte im Laufe der Zeit verändern, gibt es einen Button oben rechts in der App (📈), welcher alle vorhandenen Karten durchläuft und die tagesaktuellen Kartenpreise von Cardmarket.com zieht und in der Datenbank hinterlegt.
+Am unteren rechten Bildschirmrand wird der Gesamtwert sowie die Gesamtanzahl aller Karten deiner Sammlung im Format ```Wert€ | Anzahl``` angezeigt. Der Wert ergibt sich dabei aus dem tagesaktuellen 30-Tage-Durchschnittswert einer Karte, welcher beim Hinzufügen der Karte in deine Sammlung von Cardmarket.com ermittelt wird (zu sehen unter der Karte, wenn man diese hinzufügt bzw. wenn man sich diese in der Tabelle anschaut). Dabei werden alle Karten aus allen drei Tabellen berücksichtigt.<br/>
+Da sich die Werte im Laufe der Zeit verändern, gibt es einen Button oben rechts in der App ```📈```, welcher alle vorhandenen Karten durchläuft und die tagesaktuellen Kartenpreise von Cardmarket.com zieht und in der Datenbank hinterlegt.
 
 ### Genutzte Technologien
 

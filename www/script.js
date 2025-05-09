@@ -130,18 +130,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateKartenAnzahl() {
-      const rows = document.querySelectorAll("#kartentabelle tbody tr");
-      let gesamt = 0;
-    
-      rows.forEach(row => {
+      // Pokémon
+      let pokemonCount = 0;
+      document.querySelectorAll("#kartentabelle tbody tr").forEach(row => {
         if (row.style.display === "none") return;
-    
         const cards = row.querySelectorAll("div[id^='kartenContainer_'] img");
-        gesamt += cards.length;
+        pokemonCount += cards.length;
       });
+      const elPokemon = document.getElementById("kartenAnzahl");
+      if (elPokemon) elPokemon.textContent = `(${pokemonCount})`;
     
-      document.getElementById("kartenAnzahl").textContent = `(${gesamt})`;
-    }    
+      // Trainer
+      let trainerCount = 0;
+      document.querySelectorAll("#trainertabelle tbody tr").forEach(row => {
+        if (row.style.display === "none") return;
+        const cards = row.querySelectorAll("div[id$='Container'] img");
+        trainerCount += cards.length;
+      });
+      const elTrainer = document.getElementById("kartenAnzahlTrainer");
+      if (elTrainer) elTrainer.textContent = `(${trainerCount})`;
+    
+      // Energie
+      let energieCount = 0;
+      document.querySelectorAll("#energietabelle tbody tr").forEach(row => {
+        if (row.style.display === "none") return;
+        const cards = row.querySelectorAll("div[id$='Container'] img");
+        energieCount += cards.length;
+      });
+      const elEnergie = document.getElementById("kartenAnzahlEnergie");
+      if (elEnergie) elEnergie.textContent = `(${energieCount})`;
+    }        
 
     async function loadSavedCards(dex) {
       
@@ -617,29 +635,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const energieResult = await db.query(`SELECT avg30 FROM energy WHERE avg30 IS NOT NULL`);
         let summe = 0;
     
-        for (const row of cardResult.values) {
-          summe += row.avg30;
-        }
-
-        for (const row of trainerResult.values) {
-          summe += row.avg30;
-        }
-
-        for (const row of energieResult.values) {
-          summe += row.avg30;
-        }
+        for (const row of cardResult.values) summe += row.avg30;
+        for (const row of trainerResult.values) summe += row.avg30;
+        for (const row of energieResult.values) summe += row.avg30;
     
         let symbol = "🪙";
         if (summe > 1000) symbol = "🔥";
         else if (summe > 500) symbol = "💰";
     
-        const text = `Gesamtwert: ${symbol} ${summe.toFixed(2)}€`;
-        document.getElementById("gesamtwert").textContent = text;
+        document.getElementById("gesamtwert").textContent = `${summe.toFixed(2)}€ ${symbol} | `;
+    
+        // 🆕 Kartenzählung hinzufügen
+        const resultCards = await db.query(`SELECT COUNT(*) as count FROM cards`);
+        const resultTrainer = await db.query(`SELECT COUNT(*) as count FROM trainer`);
+        const resultEnergie = await db.query(`SELECT COUNT(*) as count FROM energy`);
+        const totalCards =
+          resultCards.values[0].count +
+          resultTrainer.values[0].count +
+          resultEnergie.values[0].count;
+    
+        const gesamtanzahlEl = document.getElementById("gesamtanzahl");
+        if (gesamtanzahlEl) gesamtanzahlEl.textContent = `${totalCards}`;
     
       } catch (error) {
         console.error("Fehler beim Berechnen des Gesamtwerts:", error);
       }
-    }
+    }    
     
     async function aktualisiereAllePreise() {
       const result = await db.query(`SELECT cardId FROM cards`);
@@ -984,6 +1005,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.appendChild(trTool);
     
       await loadTrainerCards();
+      updateKartenAnzahl();
     };
 
     async function loadTrainerCards() {
@@ -1449,6 +1471,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.appendChild(trSpezial);
     
       await loadEnergieCards();
+      updateKartenAnzahl();
     };
 
     async function loadEnergieCards() {
