@@ -57,7 +57,7 @@ Mit einem Klick auf eine bereits hinzugefügte Karte in der Tabelle wird die Det
 
 #### 6. Kartenwert (powered by Cardmarket.com)
 
-Am unteren rechten Bildschirmrand wird der Gesamtwert sowie die Gesamtanzahl aller Karten deiner Sammlung im Format ```Wert€ | Anzahl``` angezeigt. Der Wert ergibt sich dabei aus dem tagesaktuellen 30-Tage-Durchschnittswert einer Karte, welcher beim Hinzufügen der Karte in deine Sammlung von Cardmarket.com ermittelt wird (zu sehen unter der Karte, wenn man diese hinzufügt bzw. wenn man sich diese in der Tabelle anschaut). Dabei werden alle Karten aus allen drei Tabellen berücksichtigt.<br/>
+Am unteren rechten Bildschirmrand wird der Gesamtwert sowie die Gesamtanzahl aller Karten deiner Sammlung im Format ```Σ: {Wert}€ | {Anzahl} Karten``` angezeigt. Der Wert ergibt sich dabei aus dem tagesaktuellen 30-Tage-Durchschnittswert einer Karte, welcher beim Hinzufügen der Karte in deine Sammlung von Cardmarket.com ermittelt wird (zu sehen unter der Karte, wenn man diese hinzufügt bzw. wenn man sich diese in der Tabelle anschaut). Dabei werden alle Karten aus allen drei Tabellen berücksichtigt.<br/>
 Da sich die Werte im Laufe der Zeit verändern, gibt es einen Button oben rechts in der App ```📈```, welcher alle vorhandenen Karten durchläuft und die tagesaktuellen Kartenpreise von Cardmarket.com zieht und in der Datenbank hinterlegt.
 
 ### Genutzte Technologien

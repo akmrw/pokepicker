@@ -643,7 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (summe > 1000) symbol = "🔥";
         else if (summe > 500) symbol = "💰";
     
-        document.getElementById("gesamtwert").textContent = `${summe.toFixed(2)}€ ${symbol} | `;
+        document.getElementById("gesamtwert").textContent = `Σ: ${summe.toFixed(2)}€ ${symbol} | `;
     
         // 🆕 Kartenzählung hinzufügen
         const resultCards = await db.query(`SELECT COUNT(*) as count FROM cards`);
@@ -655,7 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
           resultEnergie.values[0].count;
     
         const gesamtanzahlEl = document.getElementById("gesamtanzahl");
-        if (gesamtanzahlEl) gesamtanzahlEl.textContent = `${totalCards}`;
+        if (gesamtanzahlEl) gesamtanzahlEl.textContent = `${totalCards} Karten`;
     
       } catch (error) {
         console.error("Fehler beim Berechnen des Gesamtwerts:", error);
