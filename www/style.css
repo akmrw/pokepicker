@@ -113,6 +113,7 @@ td.pokemon {
     padding: 10px;
     border-radius: 10px;
     max-width: 90%;
+    display: block;
 }
 
 #pokemonFilterContainer label {

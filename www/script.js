@@ -757,67 +757,75 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     function applyFilter() {
-      const rows = document.querySelectorAll("#kartentabelle tbody tr");
+      const tabellenIds = ["kartentabelle", "trainertabelle", "energietabelle"];
+      const isPositiveFilterActive = Object.values(filterStates).some(state => state === "positive");
     
-      rows.forEach(row => {
-        const container = row.querySelector("div[id^='kartenContainer_']");
-        const cards = container.querySelectorAll("img");
+      tabellenIds.forEach(tableId => {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
     
-        let hasReverse = false;
-        let hasHolo = false;
-        let hasV = false;
-        let hasVMAX = false;
-        let hasEX = false;
-        let hasShiny = false;
+        rows.forEach(row => {
+          const container = row.querySelector("div[id*='Container']");
+          if (!container) return;
     
-        cards.forEach(img => {
-          const cardId = img.alt;
-          const card = window.cachedCards?.[cardId];
-          if (!card) return;
+          const cards = container.querySelectorAll("img");
+          let visibleCardCount = 0;
     
-          if (card.reverse == 1) hasReverse = true;
-          if (card.holo == 1) hasHolo = true;
-          if (card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v")) hasV = true;
-          if (card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax") || 
-              card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar")) hasVMAX = true;
-          if (card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex")) hasEX = true;
-          if (card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny")) hasShiny = true;
-
+          cards.forEach(img => {
+            const cardId = img.alt;
+            const card = window.cachedCards?.[cardId];
+            if (!card) {
+              img.style.display = "none";
+              return;
+            }
+    
+            let show = true;
+    
+            // Reverse
+            if (filterStates.reverse === "positive" && card.reverse !== 1) show = false;
+            if (filterStates.reverse === "negative" && card.reverse === 1) show = false;
+    
+            // Holo
+            if (filterStates.holo === "positive" && card.holo !== 1) show = false;
+            if (filterStates.holo === "negative" && card.holo === 1) show = false;
+    
+            // V
+            if (filterStates.v === "positive" && !(card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
+            if (filterStates.v === "negative" && (card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
+    
+            // VMAX / VSTAR
+            const isVMAX = card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax");
+            const isVSTAR = card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar");
+            if (filterStates.vmax === "positive" && !(isVMAX || isVSTAR)) show = false;
+            if (filterStates.vmax === "negative" && (isVMAX || isVSTAR)) show = false;
+    
+            // EX
+            if (filterStates.ex === "positive" && !(card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
+            if (filterStates.ex === "negative" && (card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
+    
+            // Shiny
+            const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
+            if (filterStates.shiny === "positive" && !isShiny) show = false;
+            if (filterStates.shiny === "negative" && isShiny) show = false;
+    
+            img.style.display = show ? "inline-block" : "none";
+            if (show) visibleCardCount++;
+          });
+    
+          // Logik für Sichtbarkeit der gesamten Zeile:
+          if (cards.length === 0) {
+            // Wenn keine Karten vorhanden: Nur ausblenden bei positivem Filter
+            row.style.display = isPositiveFilterActive ? "none" : "";
+          } else {
+            // Wenn Karten vorhanden: Nur zeigen, wenn mind. eine sichtbar
+            row.style.display = visibleCardCount > 0 ? "" : "none";
+          }
         });
-    
-        let show = true;
-    
-        // Reverse-Filter prüfen
-        if (filterStates.reverse === "positive" && !hasReverse) show = false;
-        if (filterStates.reverse === "negative" && hasReverse) show = false;
-    
-        // Holo-Filter prüfen
-        if (filterStates.holo === "positive" && !hasHolo) show = false;
-        if (filterStates.holo === "negative" && hasHolo) show = false;
-
-        // V-Filter prüfen
-        if (filterStates.v === "positive" && !hasV) show = false;
-        if (filterStates.v === "negative" && hasV) show = false;
-
-        // VMAX-Filter prüfen
-        if (filterStates.vmax === "positive" && !hasVMAX) show = false;
-        if (filterStates.vmax === "negative" && hasVMAX) show = false;
-
-        // Ex-Filter prüfen
-        if (filterStates.ex === "positive" && !hasEX) show = false;
-        if (filterStates.ex === "negative" && hasEX) show = false;
-
-        // Shiny-Filter prüfen
-        if (filterStates.shiny === "positive" && !hasShiny) show = false;
-        if (filterStates.shiny === "negative" && hasShiny) show = false;
-    
-        row.style.display = show ? "" : "none";
       });
     
       updateEintragsAnzahl();
       updateKartenAnzahl();
       updateGesamtwert();
-    }
+    }                    
     
     function toggleFilter(type) {
       // Toggle durch die drei Zustände
@@ -921,7 +929,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.zeigePokemonTabelle = function () {
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTablePokemon").classList.add("active");
-      document.getElementById("pokemonFilterContainer").style.display = "block";
 
       zeigeTabelle("kartentabelle");
 
@@ -930,8 +937,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.zeigeTrainerTabelle = async function () {
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTableTrainer").classList.add("active");
-
-      document.getElementById("pokemonFilterContainer").style.display = "none";
 
       zeigeTabelle("trainertabelle");
 
@@ -1417,8 +1422,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.zeigeEnergieTabelle = async function () {
       document.querySelectorAll('#tableToggle button').forEach(btn => btn.classList.remove('active'))
       document.getElementById("showTableEnergie").classList.add("active");
-
-      document.getElementById("pokemonFilterContainer").style.display = "none";
       
       zeigeTabelle("energietabelle");
     
