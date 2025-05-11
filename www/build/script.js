@@ -1124,7 +1124,7 @@
           <p>Karten werden geladen</p>
           <div class="loader"></div>
         </div>
-      `,d.classList.remove("hidden"),d.classList.add("shown");try{let u=await a(s),m=await i(s);m=="Nidoran\u2642"&&(m="Nidoran \u2642"),m=="Nidoran\u2640"&&(m="Nidoran \u2640"),m=="Sirfetch\u2019d"&&(m="Sirfetch'd");let l=window.cachedPokemonCardsByName[m];if(l||(l=await K(m),l&&(window.cachedPokemonCardsByName[m]=l)),!l||l.length===0){d.innerHTML=`
+      `,d.classList.remove("hidden"),d.classList.add("shown");try{let u=await a(s),m=await i(s);m=="Nidoran\u2642"&&(m="Nidoran \u2642"),m=="Nidoran\u2640"&&(m="Nidoran \u2640"),m=="Farfetch\u2019d"&&(m="Farfetch'd"),m=="Sirfetch\u2019d"&&(m="Sirfetch'd");let l=window.cachedPokemonCardsByName[m];if(l||(l=await K(m),l&&(window.cachedPokemonCardsByName[m]=l)),!l||l.length===0){d.innerHTML=`
             <div id='overlayContent'>
               <h2>Keine Karten gefunden.</h2> 
               <button class="overlayMenuBtn" id="BackBtn">Schlie\xDFen</button>

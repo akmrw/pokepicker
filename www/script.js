@@ -317,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (engName == "Nidoran♂") engName = "Nidoran ♂";
         if (engName == "Nidoran♀") engName = "Nidoran ♀";
+        if (engName == "Farfetch’d") engName = "Farfetch'd";
         if (engName == "Sirfetch’d") engName = "Sirfetch'd";
 
         let cards = window.cachedPokemonCardsByName[engName];
