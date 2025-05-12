@@ -158,7 +158,15 @@ document.addEventListener("DOMContentLoaded", () => {
         img.style.width = "50px";
         img.style.height = "69px";
         img.style.objectFit = "cover";
-        img.src = card.imageLow;
+        
+        // Setze zuerst Platzhalter
+        img.src = "cardBackside.png";
+
+        // Sobald Original geladen ist, ersetze
+        const tempImage = new Image();
+        tempImage.onload = () => img.src = card.imageLow;
+        tempImage.onerror = () => console.warn("Fehler beim Laden von:", card.imageLow);
+        tempImage.src = card.imageLow;
 
         img.addEventListener("click", () => openCardGallery(dex, ids.indexOf(String(card.id))));
         fragment.appendChild(img);
@@ -238,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <h2>Pokémon</h2>
               <div style="display:flex; align-items:center; justify-content:center;">
                 <div style="display:flex; flex-direction:column; align-items:center;">
-                  <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
+                  <img id="cardImage" src="cardBackside.png" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                   <p style="margin-top:10px;">
                     ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
                     30d-Wert: <strong>${preisText}</strong><br>
@@ -250,6 +258,13 @@ document.addEventListener("DOMContentLoaded", () => {
               <button id="deleteCard">❌ Karte löschen</button>
             </div>
           `;
+
+          const img = new Image();
+          img.onload = () => {
+            document.getElementById("cardImage").src = card.imageHigh;
+          };
+          img.onerror = () => console.warn("Fehler beim Laden des Galerie-Bildes:", card.imageHigh);
+          img.src = card.imageHigh;
     
           document.getElementById("deleteCard").addEventListener("click", async () => {
             if (confirm("Willst du diese Karte wirklich löschen?")) {
@@ -1074,11 +1089,19 @@ document.addEventListener("DOMContentLoaded", () => {
         window.cachedCards[trainer.cardId] = trainer;
     
         const img = document.createElement("img");
-        img.src = trainer.imageLow;
         img.alt = trainer.cardId;
         img.style.width = "50px";
         img.style.height = "69px";
         img.style.objectFit = "cover";
+
+        // Setze zuerst Platzhalter
+        img.src = "cardBackside.png";
+
+        // Sobald Original geladen ist, ersetze
+        const tempImage = new Image();
+        tempImage.onload = () => img.src = trainer.imageLow;
+        tempImage.onerror = () => console.warn("Fehler beim Laden von:", trainer.imageLow);
+        tempImage.src = trainer.imageLow;
         
         let subtype = "";
         if (Array.isArray(trainer.subTypes)) {
@@ -1431,7 +1454,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h2>Trainer</h2>
             <div style="display:flex; align-items:center; justify-content:center;">
               <div style="display:flex; flex-direction:column; align-items:center;">
-                <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
+                <img id="cardImage" src="cardBackside.png" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                 <p style="margin-top:10px;">
                   ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
                   30d-Wert: <strong>${preisText}</strong><br>
@@ -1443,7 +1466,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="deleteTrainer">❌ Karte löschen</button>
           </div>
         `;
-    
+
+        const img = new Image();
+        img.onload = () => {
+          document.getElementById("cardImage").src = card.imageHigh;
+        };
+        img.onerror = () => console.warn("Fehler beim Laden des Galerie-Bildes:", card.imageHigh);
+        img.src = card.imageHigh;
+
         document.getElementById("deleteTrainer").addEventListener("click", async () => {
           if (confirm("Willst du diese Karte wirklich löschen?")) {
             await db.run(`DELETE FROM trainer WHERE id = ?`, [id]);
@@ -1536,13 +1566,21 @@ document.addEventListener("DOMContentLoaded", () => {
         window.cachedCards[energie.cardId] = energie;
     
         const img = document.createElement("img");
-        img.src = energie.imageLow;
         img.alt = energie.cardId;
         img.style.width = "50px";
         img.style.height = "69px";
         img.style.objectFit = "cover";
         const subtype = energie.subTypes?.toLowerCase() || "";
         img.addEventListener("click", () => openEnergieCardGallery(energie.id, subtype.includes("basic") ? "basic" : "special"));
+
+        // Setze zuerst Platzhalter
+        img.src = "cardBackside.png";
+
+        // Sobald Original geladen ist, ersetze
+        const tempImage = new Image();
+        tempImage.onload = () => img.src = energie.imageLow;
+        tempImage.onerror = () => console.warn("Fehler beim Laden von:", energie.imageLow);
+        tempImage.src = energie.imageLow;
 
         if (energie.subTypes?.toLowerCase().includes("basic")) basicFragment.appendChild(img);
         else if (energie.subTypes?.toLowerCase().includes("special")) specialFragment.appendChild(img);
@@ -1867,7 +1905,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h2>Energie</h2>
             <div style="display:flex; align-items:center; justify-content:center;">
               <div style="display:flex; flex-direction:column; align-items:center;">
-                <img src="${card.imageHigh}" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
+                <img id="cardImage" src="cardBackside.png" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                 <p style="margin-top:10px;">
                   ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
                   30d-Wert: <strong>${preisText}</strong><br>
@@ -1879,6 +1917,13 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="deleteEnergie">❌ Karte löschen</button>
           </div>
         `;
+        
+        const img = new Image();
+        img.onload = () => {
+          document.getElementById("cardImage").src = card.imageHigh;
+        };
+        img.onerror = () => console.warn("Fehler beim Laden des Galerie-Bildes:", card.imageHigh);
+        img.src = card.imageHigh;
     
         document.getElementById("deleteEnergie").addEventListener("click", async () => {
           if (confirm("Willst du diese Karte wirklich löschen?")) {
