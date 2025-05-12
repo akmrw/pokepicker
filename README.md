@@ -2,7 +2,7 @@
 
 # PokéPicker
 
-## Eine iOS-App, mit der du deine PokémonTCG-Karten organisieren kannst.
+## Eine iOS-App, mit der du deine PokémonTCG-Karten organisieren kannst
 
 ### Features der App (von oben nach unten)
 
