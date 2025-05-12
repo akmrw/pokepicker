@@ -281,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
               loadSavedCards(dex);
               updateKartenAnzahl();
               updateGesamtwert();
+              applyFilter();
             }
           });
     
@@ -624,6 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateEintragsAnzahl();
         updateKartenAnzahl();
         updateGesamtwert();
+        applyFilter();
       }
     
       document.getElementById("btnBasic").addEventListener("click", () => finalizeCardSelection("basic"));
@@ -843,7 +845,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyFilter() {
       const tabellenIds = ["kartentabelle", "trainertabelle", "energietabelle"];
-      const isPositiveFilterActive = Object.values(filterStates).some(state => state === "positive");
+      const isOnlyNegativeActive = isOnlyNegativeFiltersActive();
     
       tabellenIds.forEach(tableId => {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
@@ -853,8 +855,110 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!container) return;
     
           const cards = container.querySelectorAll("img");
-          let visibleCardCount = 0;
     
+          // 🔍 Pokémon-Tabelle mit spezieller Logik
+          if (tableId === "kartentabelle") {
+            let ausblenden = false;
+          
+            if (cards.length > 0) {
+              for (const img of cards) {
+                const cardId = img.alt;
+                const card = window.cachedCards?.[cardId];
+                if (!card) continue;
+          
+                // ❌ Negative Filter: Wenn eine Karte ein Kriterium erfüllt, Pokémon ausblenden
+                if (filterStates.reverse === "negative" && card.reverse == 1) { ausblenden = true; break; }
+                if (filterStates.holo === "negative" && card.holo == 1) { ausblenden = true; break; }
+          
+                const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
+                if (filterStates.shiny === "negative" && isShiny) { ausblenden = true; break; }
+          
+                const isV = card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v");
+                if (filterStates.v === "negative" && isV) { ausblenden = true; break; }
+          
+                const isVMAX = card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax");
+                const isVSTAR = card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar");
+                if (filterStates.vmax === "negative" && (isVMAX || isVSTAR)) { ausblenden = true; break; }
+          
+                const isEX = card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex");
+                if (filterStates.ex === "negative" && isEX) { ausblenden = true; break; }
+              }
+          
+              // 🟢 Positive Filter: Karte zeigen, wenn sie mindestens ein Kriterium erfüllt
+              for (const img of cards) {
+                const cardId = img.alt;
+                const card = window.cachedCards?.[cardId];
+                if (!card) {
+                  img.style.display = "none";
+                  continue;
+                }
+          
+                const activePositiveFilters = {
+                  reverse: filterStates.reverse === "positive",
+                  holo: filterStates.holo === "positive",
+                  shiny: filterStates.shiny === "positive",
+                  v: filterStates.v === "positive",
+                  vmax: filterStates.vmax === "positive",
+                  ex: filterStates.ex === "positive"
+                };
+          
+                const anyPositiveActive = Object.values(activePositiveFilters).some(v => v);
+                let zeigen = true;
+          
+                if (anyPositiveActive) {
+                  const matches = [];
+          
+                  if (activePositiveFilters.reverse) matches.push(card.reverse == 1);
+                  if (activePositiveFilters.holo) matches.push(card.holo == 1);
+                  if (activePositiveFilters.shiny) {
+                    const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
+                    matches.push(isShiny);
+                  }
+                  if (activePositiveFilters.v) {
+                    const isV = card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v");
+                    matches.push(isV);
+                  }
+                  if (activePositiveFilters.vmax) {
+                    const isVMAX = card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax");
+                    const isVSTAR = card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar");
+                    matches.push(isVMAX || isVSTAR);
+                  }
+                  if (activePositiveFilters.ex) {
+                    const isEX = card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex");
+                    matches.push(isEX);
+                  }
+          
+                  zeigen = matches.some(Boolean);
+                }
+          
+                img.style.display = zeigen ? "inline-block" : "none";
+              }
+          
+              // 🧠 Zeilen-Sichtbarkeit auf Basis der Filterlogik
+              const hasPositive = Object.values(filterStates).includes("positive");
+              const isOnlyNegative = Object.values(filterStates).every(v => v === "neutral" || v === "negative");
+          
+              if (ausblenden) {
+                row.style.display = "none";
+              } else if (cards.length === 0) {
+                row.style.display = isOnlyNegative ? "" : "none";
+              } else {
+                // Zeige nur, wenn mindestens eine Karte sichtbar ist
+                const sichtbareKarten = [...cards].filter(img => img.style.display !== "none");
+                row.style.display = sichtbareKarten.length > 0 ? "" : "none";
+              }
+          
+              return; // Pokémon-Logik beendet – nächste Zeile
+            }
+          
+            // Pokémon ohne Karten
+            const isOnlyNegative = Object.values(filterStates).every(v => v === "neutral" || v === "negative");
+            row.style.display = isOnlyNegative ? "" : "none";
+            return;
+          }          
+    
+          // 🔁 Standard-Logik für Trainer/Energie
+          let visibleCardCount = 0;
           cards.forEach(img => {
             const cardId = img.alt;
             const card = window.cachedCards?.[cardId];
@@ -865,52 +969,45 @@ document.addEventListener("DOMContentLoaded", () => {
     
             let show = true;
     
-            // Reverse
-            if (filterStates.reverse === "positive" && card.reverse !== 1) show = false;
-            if (filterStates.reverse === "negative" && card.reverse === 1) show = false;
-    
-            // Holo
-            if (filterStates.holo === "positive" && card.holo !== 1) show = false;
-            if (filterStates.holo === "negative" && card.holo === 1) show = false;
-    
-            // V
-            if (filterStates.v === "positive" && !(card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
+            // Negative Filter
+            if (filterStates.reverse === "negative" && card.reverse == 1) show = false;
+            if (filterStates.holo === "negative" && card.holo == 1) show = false;
             if (filterStates.v === "negative" && (card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
     
-            // VMAX / VSTAR
             const isVMAX = card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax");
             const isVSTAR = card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar");
-            if (filterStates.vmax === "positive" && !(isVMAX || isVSTAR)) show = false;
             if (filterStates.vmax === "negative" && (isVMAX || isVSTAR)) show = false;
     
-            // EX
-            if (filterStates.ex === "positive" && !(card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
             if (filterStates.ex === "negative" && (card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
     
-            // Shiny
             const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
-            if (filterStates.shiny === "positive" && !isShiny) show = false;
             if (filterStates.shiny === "negative" && isShiny) show = false;
+    
+            // Positive Filter
+            if (filterStates.reverse === "positive" && card.reverse != 1) show = false;
+            if (filterStates.holo === "positive" && card.holo != 1) show = false;
+            if (filterStates.v === "positive" && !(card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
+            if (filterStates.vmax === "positive" && !(isVMAX || isVSTAR)) show = false;
+            if (filterStates.ex === "positive" && !(card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
+            if (filterStates.shiny === "positive" && !isShiny) show = false;
     
             img.style.display = show ? "inline-block" : "none";
             if (show) visibleCardCount++;
           });
     
-          // Logik für Sichtbarkeit der gesamten Zeile:
-          if (cards.length === 0) {
-            // Wenn keine Karten vorhanden: Nur ausblenden bei positivem Filter
-            row.style.display = isPositiveFilterActive ? "none" : "";
-          } else {
-            // Wenn Karten vorhanden: Nur zeigen, wenn mind. eine sichtbar
-            row.style.display = visibleCardCount > 0 ? "" : "none";
-          }
+          row.style.display = visibleCardCount > 0 ? "" : "none";
         });
       });
     
       updateEintragsAnzahl();
       updateKartenAnzahl();
       updateGesamtwert();
-    }                    
+    }                     
+    
+    function isOnlyNegativeFiltersActive() {
+      return Object.values(filterStates).every(v => v === "neutral" || v === "negative") &&
+             Object.values(filterStates).some(v => v === "negative");
+    }    
     
     function toggleFilter(type) {
       // Toggle durch die drei Zustände
