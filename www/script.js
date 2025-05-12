@@ -294,6 +294,14 @@ document.addEventListener("DOMContentLoaded", () => {
       showCard();
     }    
 
+    window.filterPokemonCardsByNumber = function () {
+      const value = document.getElementById("nummerSuche").value.trim();
+      document.querySelectorAll(".kartenItem").forEach(item => {
+        const number = item.dataset.number;
+        item.style.display = number && number.startsWith(value) ? "block" : "none";
+      });
+    }; 
+
     //Öffnet das Overlay zum Aussuchen des neuen Kartentyps nach Klick auf Button "+ Neue Karte"
     window.openOverlay = async function (dex) {
 
@@ -351,7 +359,10 @@ document.addEventListener("DOMContentLoaded", () => {
               Kartenauswahl für<br>
               <strong>${name}</strong>:
             </h2>
-            <p>Welche Karte möchtest du hinzufügen?</p>
+            <p>
+              Welche Karte möchtest du hinzufügen?<br>
+              <input type="text" id="nummerSuche" placeholder="Kartennummer eingeben…" onkeyup="filterPokemonCardsByNumber()">
+            </p>
             <div class="kartenGrid">
         `;
     
@@ -375,8 +386,10 @@ document.addEventListener("DOMContentLoaded", () => {
             preisText = `<span style="color:${farbe}; font-size:14px;">${symbol} ${wert}€</span>`;
           }
         
+          const nummer = card.id.split("-")[1]; // z.B. "123"
+
           html += `
-            <div class="kartenItem" onclick="karteAuswählen('${card.id}', '${dex}', '${name}')">
+            <div class="kartenItem" data-id="${card.id}" data-number="${nummer}" onclick="karteAuswählen('${card.id}', '${dex}', '${name}')">
               <div>ID: ${card.id}</div>
               <img src="${card.images.small}" alt="${name}">
               <div>${preisText}</div>
@@ -720,29 +733,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //Filtert die Tabellen-Einträge nach Input (Dex-Nr. oder Name)
     function searchTable() {
-      let input = document.getElementById("search");
-      let filter = input.value.toUpperCase();
-      let table = document.getElementById("kartentabelle");
-      let tr = table.getElementsByTagName("tr");
-
-      for (let i = 1; i < tr.length; i++) {
-        tr[i].style.display = "none";
-        let td = tr[i].getElementsByTagName("td");
-        for (let j = 0; j < td.length; j++) {
-          let cell = td[j];
-          if (cell && cell.innerHTML.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-            break;
+      const input = document.getElementById("search").value.trim().toUpperCase();
+      const tabellen = ["kartentabelle", "trainertabelle", "energietabelle"];
+    
+      tabellen.forEach(tableId => {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+    
+        rows.forEach(row => {
+          const nameLink = row.querySelector("td.pokemon a"); // nur Pokémon-Tabelle
+          const kartenImgs = row.querySelectorAll("div[id*='Container'] img");
+    
+          // Fall: leeres Suchfeld → alles zeigen
+          if (input === "") {
+            row.style.display = "";
+            kartenImgs.forEach(img => img.style.display = "inline-block");
+            return;
           }
-        }
-      }
-
+    
+          let zeigeZeile = false;
+    
+          // Pokémon-Tabelle
+          if (tableId === "kartentabelle" && nameLink) {
+            const namePasst = nameLink.textContent.toUpperCase().includes(input);
+    
+            if (namePasst) {
+              zeigeZeile = true;
+              kartenImgs.forEach(img => img.style.display = "inline-block");
+            } else {
+              let passendeKarte = false;
+              kartenImgs.forEach(img => {
+                const cardId = img.alt.toUpperCase();
+                const nummer = cardId.split("-")[1] || "";
+                const passt = nummer.includes(input) || nummer.startsWith(input);
+                img.style.display = passt ? "inline-block" : "none";
+                if (passt) passendeKarte = true;
+              });
+              zeigeZeile = passendeKarte;
+            }
+          }
+    
+          // Trainer- und Energie-Tabelle
+          if (tableId !== "kartentabelle") {
+            let passendeKarte = false;
+            kartenImgs.forEach(img => {
+              const cardId = img.alt.toUpperCase();
+              const nummer = cardId.split("-")[1] || "";
+              const passt = nummer.includes(input) || nummer.startsWith(input);
+              img.style.display = passt ? "inline-block" : "none";
+              if (passt) passendeKarte = true;
+            });
+            zeigeZeile = passendeKarte;
+          }
+    
+          row.style.display = zeigeZeile ? "" : "none";
+        });
+      });
+    
       updateEintragsAnzahl();
       updateKartenAnzahl();
       updateGesamtwert();
-    }
+    }        
 
     window.searchTable = searchTable; // wichtig, sonst geht onkeyup="search()" im HTML nicht!
+
+    // Zeigt oder versteckt das "×"-Symbol abhängig vom Inhalt
+    document.getElementById("search").addEventListener("input", function () {
+      const clearBtn = document.getElementById("clearSearch");
+      clearBtn.style.display = this.value.trim() ? "inline" : "none";
+    });
+
+    // Klick auf das "×"-Symbol leert das Feld und setzt Filter zurück
+    document.getElementById("clearSearch").addEventListener("click", function () {
+      const input = document.getElementById("search");
+      input.value = "";
+      this.style.display = "none";
+      searchTable();
+    });
     
     const filterStates = {
       reverse: "neutral", // kann sein: "neutral", "positive", "negative"
