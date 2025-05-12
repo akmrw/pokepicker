@@ -323,6 +323,10 @@ button.closeGallery:hover {
     color: black;
 }
 
+#nummerSuche {
+    margin-bottom: 20px;
+}
+
 /* ===== Karten-Gitter ===== */
 
 .kartenGrid {
