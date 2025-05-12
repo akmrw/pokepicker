@@ -215,19 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (card.reverse == 1) variante = "Reverse";
           if (card.holo == 1) variante = "Holo";
 
-          // 🔁 Preis laden (mit Fallback)
-          let wert30d = await fetchPrice(card.cardId);
-          if (wert30d == null) {
-            const cleanedId = cleanCardId(card.cardId);
-            wert30d = await fetchPrice(cleanedId);
-          }
-
-          // 💶 Preis formatieren oder Ersatz anzeigen
+          // 💶 Preis formatieren
+          let wert30d = card.avg30;
           let preisText = "–";
           if (wert30d != null) {
             const wert = wert30d.toFixed(2);
-            let farbe = "#DEDEDE"; // Standard grau
-            let symbol = "🪙";      // Günstig
+            let farbe = "#DEDEDE";
+            let symbol = "🪙";
 
             if (wert30d > 20) {
               farbe = "#FF4444";
@@ -238,6 +232,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             preisText = `<span style="color:${farbe};">${symbol} ${wert}€</span>`;
+          } else {
+            preisText = `<span style="color:#888;">🕸 Kein Preis gespeichert</span>`;
           }
           
           overlayElement.innerHTML = `
@@ -319,6 +315,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //Öffnet das Overlay zum Aussuchen des neuen Kartentyps nach Klick auf Button "+ Neue Karte"
     window.openOverlay = async function (dex) {
+
+      if (!navigator.onLine) {
+        alert("Für diese Funktion wird eine Internetverbindung benötigt!");
+        return null;
+      }
 
       const overlayElement = document.querySelector("#overlay");
       
@@ -667,6 +668,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }    
     
     async function aktualisiereAllePreise() {
+
+      if (!navigator.onLine) {
+        alert("Für diese Funktion wird eine Internetverbindung benötigt!");
+        return null;
+      }
+
       const result = await db.query(`SELECT cardId FROM cards`);
       const trainerResult = await db.query(`SELECT cardId FROM trainer`);
       const energieResult = await db.query(`SELECT cardId FROM energy`);
@@ -1134,6 +1141,12 @@ document.addEventListener("DOMContentLoaded", () => {
     } 
 
     window.openTrainerOverlay = async function (subType) {
+
+      if (!navigator.onLine) {
+        alert("Für diese Funktion wird eine Internetverbindung benötigt!");
+        return null;
+      }
+
       const overlayElement = document.querySelector("#overlay");
     
       // Ladeanzeige
@@ -1433,19 +1446,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (card.reverse == 1) variante = "Reverse";
         if (card.holo == 1) variante = "Holo";
     
+        // 💶 Preis formatieren
+        let wert30d = card.avg30;
         let preisText = "–";
-        let wert30d = await fetchPrice(card.cardId);
-        if (wert30d == null) {
-          const cleanedId = cleanCardId(card.cardId);
-          wert30d = await fetchPrice(cleanedId);
-        }
-    
         if (wert30d != null) {
           const wert = wert30d.toFixed(2);
-          let farbe = "#DEDEDE", symbol = "🪙";
-          if (wert30d > 20) { farbe = "#FF4444"; symbol = "🔥"; }
-          else if (wert30d > 5) { farbe = "#FFAA00"; symbol = "💰"; }
+          let farbe = "#DEDEDE";
+          let symbol = "🪙";
+
+          if (wert30d > 20) {
+            farbe = "#FF4444";
+            symbol = "🔥";
+          } else if (wert30d > 5) {
+            farbe = "#FFAA00";
+            symbol = "💰";
+          }
+
           preisText = `<span style="color:${farbe};">${symbol} ${wert}€</span>`;
+        } else {
+          preisText = `<span style="color:#888;">🕸 Kein Preis gespeichert</span>`;
         }
     
         overlayElement.innerHTML = `
@@ -1592,6 +1611,12 @@ document.addEventListener("DOMContentLoaded", () => {
     } 
 
     window.openEnergieOverlay = async function (subType) {
+
+      if (!navigator.onLine) {
+        alert("Für diese Funktion wird eine Internetverbindung benötigt!");
+        return null;
+      }
+
       const overlayElement = document.querySelector("#overlay");
     
       // Ladeanzeige
@@ -1884,19 +1909,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (card.reverse == 1) variante = "Reverse";
         if (card.holo == 1) variante = "Holo";
     
+        // 💶 Preis formatieren
+        let wert30d = card.avg30;
         let preisText = "–";
-        let wert30d = await fetchPrice(card.cardId);
-        if (wert30d == null) {
-          const cleanedId = cleanCardId(card.cardId);
-          wert30d = await fetchPrice(cleanedId);
-        }
-    
         if (wert30d != null) {
           const wert = wert30d.toFixed(2);
-          let farbe = "#DEDEDE", symbol = "🪙";
-          if (wert30d > 20) { farbe = "#FF4444"; symbol = "🔥"; }
-          else if (wert30d > 5) { farbe = "#FFAA00"; symbol = "💰"; }
+          let farbe = "#DEDEDE";
+          let symbol = "🪙";
+
+          if (wert30d > 20) {
+            farbe = "#FF4444";
+            symbol = "🔥";
+          } else if (wert30d > 5) {
+            farbe = "#FFAA00";
+            symbol = "💰";
+          }
+
           preisText = `<span style="color:${farbe};">${symbol} ${wert}€</span>`;
+        } else {
+          preisText = `<span style="color:#888;">🕸 Kein Preis gespeichert</span>`;
         }
     
         overlayElement.innerHTML = `
