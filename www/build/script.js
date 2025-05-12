@@ -139,7 +139,7 @@
         (80, "0080", "Lahmus", "Slowbro"),
         (81, "0081", "Magnetilo", "Magnemite"),
         (82, "0082", "Magneton", "Magneton"),
-        (83, "0083", "Porenta", "Farfetch\u2019d"),
+        (83, "0083", "Porenta", "Farfetch'd"),
         (84, "0084", "Dodu", "Doduo"),
         (85, "0085", "Dodri", "Dodrio"),
         (86, "0086", "Jurob", "Seel"),

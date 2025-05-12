@@ -16,6 +16,15 @@ export async function initDatabase() {
   //Spalte cardName hinzufügen
   //await db.execute(`ALTER TABLE cards ADD COLUMN cardName TEXT`);
 
+  //Spalten updaten
+  /*await db.execute(`UPDATE pokemon SET engName = "Nidoran ♂" WHERE engName = "Nidoran♂"`);
+  await db.execute(`UPDATE pokemon SET engName = "Nidoran ♀" WHERE engName = "Nidoran♀"`);
+  await db.execute(`UPDATE pokemon SET engName = "Farfetch'd" WHERE engName = "Farfetch’d"`);
+  await db.execute(`UPDATE pokemon SET engName = "Sirfetch'd" WHERE engName = "Sirfetch’d"`);
+
+  await db.execute(`UPDATE pokemon SET name = "Nidoran ♂" WHERE name = "Nidoran♂"`);
+  await db.execute(`UPDATE pokemon SET name = "Nidoran ♀" WHERE name = "Nidoran♀"`);*/
+
   //Tabelle anlegen
   await db.execute(`
     CREATE TABLE IF NOT EXISTS pokemon (
@@ -173,7 +182,7 @@ export async function initDatabase() {
         (80, "0080", "Lahmus", "Slowbro"),
         (81, "0081", "Magnetilo", "Magnemite"),
         (82, "0082", "Magneton", "Magneton"),
-        (83, "0083", "Porenta", "Farfetch’d"),
+        (83, "0083", "Porenta", "Farfetch'd"),
         (84, "0084", "Dodu", "Doduo"),
         (85, "0085", "Dodri", "Dodrio"),
         (86, "0086", "Jurob", "Seel"),
@@ -1122,7 +1131,6 @@ export async function initDatabase() {
   return db;
 
 }
-
 
 export async function getDaten() {
   return await db.query("SELECT * FROM pokemon");
