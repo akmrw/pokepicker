@@ -1641,7 +1641,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
           try {
             await db.run(
-              `UPDATE cards SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
+              `UPDATE trainer SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
               [basic, reverse, holo, firstEdition, id]
             );
             
@@ -2143,7 +2143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
           try {
             await db.run(
-              `UPDATE cards SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
+              `UPDATE energy SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
               [basic, reverse, holo, firstEdition, id]
             );
             
