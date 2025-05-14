@@ -28,6 +28,8 @@ export async function initDatabase() {
   await db.execute(`UPDATE pokemon SET name = "Nidoran ♂" WHERE name = "Nidoran♂"`);
   await db.execute(`UPDATE pokemon SET name = "Nidoran ♀" WHERE name = "Nidoran♀"`);*/
 
+  //await db.execute(`UPDATE trainer SET subTypes = 'Supporter' WHERE subTypes IS NULL OR TRIM(subTypes) = '';`);
+
   //Tabelle anlegen
   await db.execute(`
     CREATE TABLE IF NOT EXISTS pokemon (

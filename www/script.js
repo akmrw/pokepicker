@@ -522,13 +522,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function fetchAllTrainerCards(subtype) {
-      let allCards = [];
+      // 1. Karten mit subtype laden
+      const cardsWithSubtype = await fetchTrainerCardsByQuery(`supertype:Trainer subtypes:${subtype}`);
+    
+      // 2. Karten ohne subtype laden und filtern
+      const allTrainerCards = await fetchTrainerCardsByQuery(`supertype:Trainer`);
+      const cardsWithoutSubtype = allTrainerCards.filter(card => !card.subtypes || card.subtypes.length === 0);
+    
+      // 3. Zusammenführen
+      const combined = [...cardsWithSubtype, ...cardsWithoutSubtype];
+    
+      // 4. Sortieren nach Name (case-insensitive)
+      combined.sort((a, b) => {
+        const nameA = a.name?.toLowerCase() || "";
+        const nameB = b.name?.toLowerCase() || "";
+        return nameA.localeCompare(nameB);
+      });
+    
+      return combined;
+    }    
+    
+    // 🔧 Hilfsfunktion zum Laden beliebiger Trainerkarten
+    async function fetchTrainerCardsByQuery(query) {
+      const allCards = [];
       let page = 1;
-      let pageSize = 250;
+      const pageSize = 250;
       let more = true;
     
       while (more) {
-        const url = `https://api.pokemontcg.io/v2/cards?q=supertype:Trainer subtypes:${subtype}&orderBy=name&page=${page}&pageSize=${pageSize}`;
+        const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`;
     
         const response = await Http.get({
           url,
@@ -539,22 +561,17 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
     
-        if (response.status !== 200 || !response.data?.data?.length) {
-          more = false;
-          break;
-        }
+        if (response.status !== 200 || !response.data?.data?.length) break;
     
         const cards = response.data.data;
     
-        // Optional: avg30 ermitteln
         for (const card of cards) {
           const prices = card.cardmarket?.prices;
           card.avg30 = prices?.avg30 ?? null;
         }
     
-        allCards = allCards.concat(cards);
+        allCards.push(...cards);
     
-        // Wenn weniger als pageSize zurückkam → keine weiteren Seiten
         if (cards.length < pageSize) {
           more = false;
         } else {
@@ -563,7 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     
       return allCards;
-    }    
+    }        
 
     async function fetchPrice(cardId) {
       try {
@@ -1280,6 +1297,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tempImage.src = trainer.imageLow;
         
         let subtype = "";
+
         if (Array.isArray(trainer.subTypes)) {
           if (trainer.subTypes.some(s => s.toLowerCase().includes("supporter"))) subtype = "supporter";
           else if (trainer.subTypes.some(s => s.toLowerCase().includes("item"))) subtype = "item";
@@ -1291,6 +1309,11 @@ document.addEventListener("DOMContentLoaded", () => {
           else if (s.includes("item")) subtype = "item";
           else if (s.includes("stadium")) subtype = "stadium";
           else if (s.includes("tool")) subtype = "tool";
+        }
+
+        // 👉 Fallback: Wenn kein Subtype erkannt wurde, default zu "supporter"
+        if (!subtype) {
+          subtype = "supporter";
         }
 
         img.addEventListener("click", () => openTrainerCardGallery(trainer.id, subtype));
@@ -1419,50 +1442,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    async function fetchAllTrainerCards(subtype) {
-      let allCards = [];
-      let page = 1;
-      let pageSize = 250;
-      let more = true;
-    
-      while (more) {
-        const url = `https://api.pokemontcg.io/v2/cards?q=supertype:Trainer subtypes:${subtype}&orderBy=name&page=${page}&pageSize=${pageSize}`;
-    
-        const response = await Http.get({
-          url,
-          headers: {
-            'Accept': 'application/json',
-            'X-Api-Key': config.API_KEY,
-            'Connection': 'close'
-          }
-        });
-    
-        if (response.status !== 200 || !response.data?.data?.length) {
-          more = false;
-          break;
-        }
-    
-        const cards = response.data.data;
-    
-        // Optional: avg30 ermitteln
-        for (const card of cards) {
-          const prices = card.cardmarket?.prices;
-          card.avg30 = prices?.avg30 ?? null;
-        }
-    
-        allCards = allCards.concat(cards);
-    
-        // Wenn weniger als pageSize zurückkam → keine weiteren Seiten
-        if (cards.length < pageSize) {
-          more = false;
-        } else {
-          page++;
-        }
-      }
-    
-      return allCards;
-    }
-
     window.trainerKarteAuswählen = async function (cardId) {
       const overlayElement = document.querySelector("#overlay");
     
@@ -1488,6 +1467,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const cardData = response.data.data;
         cardData.imageSmall = cardData.images?.small || null;
         cardData.imageLarge = cardData.images?.large || null;
+
+        if (!cardData.subtypes || cardData.subtypes.length === 0) {
+          cardData.subtypes = "Supporter";
+        }
     
         const trainerDbId = await insertTrainer(cardData);
         if (!trainerDbId) {
