@@ -874,7 +874,8 @@ document.addEventListener("DOMContentLoaded", () => {
       vmax: "neutral",
       ex: "neutral",
       shiny: "neutral",
-      firstEdition: "neutral"
+      firstEdition: "neutral",
+      illustration: "neutral"
     };
     
 
@@ -907,6 +908,9 @@ document.addEventListener("DOMContentLoaded", () => {
           
                 const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
                 if (filterStates.shiny === "negative" && isShiny) { ausblenden = true; break; }
+
+                const isIllustration = card.rarity?.toLowerCase().includes("illustration") || card.rarity?.toLowerCase().includes("trainer gallery");
+                if (filterStates.illustration === "negative" && isIllustration ) { ausblenden = true; break; }
           
                 const isV = card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v");
                 if (filterStates.v === "negative" && isV) { ausblenden = true; break; }
@@ -935,7 +939,8 @@ document.addEventListener("DOMContentLoaded", () => {
                   shiny: filterStates.shiny === "positive",
                   v: filterStates.v === "positive",
                   vmax: filterStates.vmax === "positive",
-                  ex: filterStates.ex === "positive"
+                  ex: filterStates.ex === "positive",
+                  illustration: filterStates.illustration === "positive"
                 };
           
                 const anyPositiveActive = Object.values(activePositiveFilters).some(v => v);
@@ -952,15 +957,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
                     matches.push(isShiny);
                   }
+
+                  if (activePositiveFilters.illustration) {
+                    const isIllustration = card.rarity?.toLowerCase().includes("illustration") || card.rarity?.toLowerCase().includes("trainer gallery");
+                    matches.push(isIllustration);
+                  }
+                  
                   if (activePositiveFilters.v) {
                     const isV = card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v");
                     matches.push(isV);
                   }
+
                   if (activePositiveFilters.vmax) {
                     const isVMAX = card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax");
                     const isVSTAR = card.subTypes?.toLowerCase().includes("vstar") || card.cardName?.toLowerCase().includes(" vstar");
                     matches.push(isVMAX || isVSTAR);
                   }
+
                   if (activePositiveFilters.ex) {
                     const isEX = card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex");
                     matches.push(isEX);
@@ -1020,6 +1033,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
             const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
             if (filterStates.shiny === "negative" && isShiny) show = false;
+            
+            const isIllustration = card.rarity?.toLowerCase().includes("illustration") || card.rarity?.toLowerCase().includes("trainer gallery");
+            if (filterStates.illustration === "negative" && isIllustration) show = false;
     
             // Positive Filter
             if (filterStates.reverse === "positive" && card.reverse != 1) show = false;
@@ -1029,6 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (filterStates.vmax === "positive" && !(isVMAX || isVSTAR)) show = false;
             if (filterStates.ex === "positive" && !(card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
             if (filterStates.shiny === "positive" && !isShiny) show = false;
+            if (filterStates.illustration === "positive" && !isIllustration) show = false;
     
             img.style.display = show ? "inline-block" : "none";
             if (show) visibleCardCount++;
@@ -1058,7 +1075,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateNavStyles() {
-      const filterTypes = ['reverse', 'holo', 'firstEdition', 'v', 'vmax', 'ex', 'shiny'];
+      const filterTypes = ['reverse', 'holo', 'firstEdition', 'v', 'vmax', 'ex', 'shiny', 'illustration'];
     
       for (const type of filterTypes) {
         const btn = document.getElementById(`filter-${type}`);
@@ -1084,6 +1101,7 @@ document.addEventListener("DOMContentLoaded", () => {
       filterStates.vmax = "neutral";
       filterStates.ex = "neutral";
       filterStates.shiny = "neutral";
+      filterStates.illustration = "neutral";
       applyFilter();
       updateNavStyles();
     });
@@ -1121,6 +1139,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filter-shiny").addEventListener("click", (e) => {
       e.preventDefault();
       toggleFilter("shiny");
+    });
+
+    document.getElementById("filter-illustration").addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleFilter("illustration");
     });
 
     function fadeOutOverlay() {
