@@ -109,8 +109,11 @@ document.addEventListener("DOMContentLoaded", () => {
       let pokemonCount = 0;
       document.querySelectorAll("#kartentabelle tbody tr").forEach(row => {
         if (row.style.display === "none") return;
-        const cards = row.querySelectorAll("div[id^='kartenContainer_'] img");
-        pokemonCount += cards.length;
+        const cards = row.querySelectorAll("div[id*='Container'] img")
+        cards.forEach(card => {
+          const style = window.getComputedStyle(card);
+          if (style.display !== "none") pokemonCount++;
+        });
       });
       const elPokemon = document.getElementById("kartenAnzahl");
       if (elPokemon) elPokemon.textContent = `(${pokemonCount})`;
@@ -119,8 +122,11 @@ document.addEventListener("DOMContentLoaded", () => {
       let trainerCount = 0;
       document.querySelectorAll("#trainertabelle tbody tr").forEach(row => {
         if (row.style.display === "none") return;
-        const cards = row.querySelectorAll("div[id$='Container'] img");
-        trainerCount += cards.length;
+        const cards = row.querySelectorAll("div[id*='Container'] img")
+        cards.forEach(card => {
+          const style = window.getComputedStyle(card);
+          if (style.display !== "none") trainerCount++;
+        });
       });
       const elTrainer = document.getElementById("kartenAnzahlTrainer");
       if (elTrainer) elTrainer.textContent = `(${trainerCount})`;
@@ -129,12 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
       let energieCount = 0;
       document.querySelectorAll("#energietabelle tbody tr").forEach(row => {
         if (row.style.display === "none") return;
-        const cards = row.querySelectorAll("div[id$='Container'] img");
-        energieCount += cards.length;
+        const cards = row.querySelectorAll("div[id*='Container'] img")
+        cards.forEach(card => {
+          const style = window.getComputedStyle(card);
+          if (style.display !== "none") energieCount++;
+        });
       });
       const elEnergie = document.getElementById("kartenAnzahlEnergie");
       if (elEnergie) elEnergie.textContent = `(${energieCount})`;
-    }        
+    }           
 
     async function loadSavedCards(dex) {
       
