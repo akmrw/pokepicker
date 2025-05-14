@@ -15,6 +15,9 @@ export async function initDatabase() {
   
   //Spalte cardName hinzufügen
   //await db.execute(`ALTER TABLE cards ADD COLUMN cardName TEXT`);
+  //await db.execute(`ALTER TABLE cards ADD COLUMN firstEdition INTEGER DEFAULT 0;`);
+  //await db.execute(`ALTER TABLE trainer ADD COLUMN firstEdition INTEGER DEFAULT 0;`);
+  //await db.execute(`ALTER TABLE energy ADD COLUMN firstEdition INTEGER DEFAULT 0;`);
 
   //Spalten updaten
   /*await db.execute(`UPDATE pokemon SET engName = "Nidoran ♂" WHERE engName = "Nidoran♂"`);
@@ -45,6 +48,7 @@ export async function initDatabase() {
       basic INTEGER DEFAULT 0,
       reverse INTEGER DEFAULT 0,
       holo INTEGER DEFAULT 0,
+      firstEdition INTEGER DEFAULT 0,
       addedAt TEXT,
       imageLow TEXT,
       imageHigh TEXT,
@@ -63,6 +67,7 @@ export async function initDatabase() {
       basic INTEGER DEFAULT 0,
       reverse INTEGER DEFAULT 0,
       holo INTEGER DEFAULT 0,
+      firstEdition INTEGER DEFAULT 0,
       addedAt TEXT,
       imageLow TEXT,
       imageHigh TEXT,
@@ -72,7 +77,6 @@ export async function initDatabase() {
     );
   `);
 
-  // Optimierte cards-Tabelle mit UNIQUE auf cardId
   await db.execute(`
     CREATE TABLE IF NOT EXISTS cards (
       id INTEGER PRIMARY KEY,
@@ -82,6 +86,7 @@ export async function initDatabase() {
       basic INTEGER DEFAULT 0,
       reverse INTEGER DEFAULT 0,
       holo INTEGER DEFAULT 0,
+      firstEdition INTEGER DEFAULT 0,
       addedAt TEXT,
       imageLow TEXT,
       imageHigh TEXT,

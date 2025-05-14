@@ -209,12 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
             hinzugefügtAm = datum.toLocaleString('de-DE', options);
           }
 
-          let variante = "Keine Angabe";
-
-          if (card.basic == 1) variante = "Basic";
-          if (card.reverse == 1) variante = "Reverse";
-          if (card.holo == 1) variante = "Holo";
-
           // 💶 Preis formatieren
           let wert30d = card.avg30;
           let preisText = "–";
@@ -244,7 +238,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div style="display:flex; flex-direction:column; align-items:center;">
                   <img id="cardImage" src="cardBackside.png" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                   <p style="margin-top:10px;">
-                    ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
+                    ID: ${card.cardId} | Variante:
+                    <select id="variantSelect">
+                      <option value="none" ${card.basic != 1 && card.reverse != 1 && card.holo != 1 ? "selected" : ""}>Keine Angabe</option>
+                      <option value="basic" ${card.basic == 1 ? "selected" : ""}>Basic</option>
+                      <option value="reverse" ${card.reverse == 1 ? "selected" : ""}>Reverse</option>
+                      <option value="holo" ${card.holo == 1 ? "selected" : ""}>Holo</option>
+                      <option value="firstEdition" ${card.firstEdition == 1 ? "selected" : ""}>First Edition</option>
+                    </select>
+                    <br>
                     30d-Wert: <strong>${preisText}</strong><br>
                     Hinzugefügt am: <strong>${hinzugefügtAm}
                   </p>
@@ -254,6 +256,39 @@ document.addEventListener("DOMContentLoaded", () => {
               <button id="deleteCard">❌ Karte löschen</button>
             </div>
           `;
+
+          document.getElementById("variantSelect").addEventListener("change", async function () {
+            const selected = this.value;
+          
+            // Nur 1 Variante darf aktiv sein
+            let basic = 0, reverse = 0, holo = 0, firstEdition = 0;
+            if (selected === "basic") basic = 1;
+            else if (selected === "reverse") reverse = 1;
+            else if (selected === "holo") holo = 1;
+            else if (selected === "firstEdition") firstEdition = 1;
+          
+            try {
+              await db.run(
+                `UPDATE cards SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
+                [basic, reverse, holo, firstEdition, id]
+              );
+              
+              // Cache aktualisieren
+              const cached = window.cachedCards?.[card.cardId];
+              if (cached) {
+                cached.basic = basic;
+                cached.reverse = reverse;
+                cached.holo = holo;
+                cached.firstEdition = firstEdition;
+              }
+          
+              console.log("Variante aktualisiert und Cache angepasst:", selected);
+            } catch (err) {
+              console.error("Fehler beim Aktualisieren der Variante:", err);
+              console.error("Fehlerdetails:", JSON.stringify(err));
+              alert("Fehler beim Speichern der Variante.");
+            }
+          });                   
 
           const img = new Image();
           img.onload = () => {
@@ -589,6 +624,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <br>
           <p>Welche Variante möchtest du speichern?</p>
           <button class="overlayMenuBtn" id="btnBasic">Basic</button>
+          <button class="overlayMenuBtn" id="btnFirstEdition">First Edition</button>
+          <br>
           <button class="overlayMenuBtn" id="btnReverse">Reverse</button>
           <button class="overlayMenuBtn" id="btnHolo">Holo</button>
           <br><br>
@@ -624,6 +661,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     
       document.getElementById("btnBasic").addEventListener("click", () => finalizeCardSelection("basic"));
+      document.getElementById("btnFirstEdition").addEventListener("click", () => finalizeCardSelection("firstEdition"));
       document.getElementById("btnReverse").addEventListener("click", () => finalizeCardSelection("reverse"));
       document.getElementById("btnHolo").addEventListener("click", () => finalizeCardSelection("holo"));
       document.getElementById("closeOverlayConfirm").addEventListener("click", () => finalizeCardSelection("none"));
@@ -830,17 +868,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     const filterStates = {
-      reverse: "neutral", // kann sein: "neutral", "positive", "negative"
+      reverse: "neutral",
       holo: "neutral",
       v: "neutral",
       vmax: "neutral",
       ex: "neutral",
-      shiny: "neutral"
+      shiny: "neutral",
+      firstEdition: "neutral"
     };
+    
 
     function applyFilter() {
       const tabellenIds = ["kartentabelle", "trainertabelle", "energietabelle"];
-      const isOnlyNegativeActive = isOnlyNegativeFiltersActive();
     
       tabellenIds.forEach(tableId => {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
@@ -864,6 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // ❌ Negative Filter: Wenn eine Karte ein Kriterium erfüllt, Pokémon ausblenden
                 if (filterStates.reverse === "negative" && card.reverse == 1) { ausblenden = true; break; }
                 if (filterStates.holo === "negative" && card.holo == 1) { ausblenden = true; break; }
+                if (filterStates.firstEdition === "negative" && card.firstEdition == 1) { ausblenden = true; break; }
           
                 const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
                 if (filterStates.shiny === "negative" && isShiny) { ausblenden = true; break; }
@@ -891,6 +931,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const activePositiveFilters = {
                   reverse: filterStates.reverse === "positive",
                   holo: filterStates.holo === "positive",
+                  firstEdition: filterStates.firstEdition === "positive",
                   shiny: filterStates.shiny === "positive",
                   v: filterStates.v === "positive",
                   vmax: filterStates.vmax === "positive",
@@ -905,6 +946,8 @@ document.addEventListener("DOMContentLoaded", () => {
           
                   if (activePositiveFilters.reverse) matches.push(card.reverse == 1);
                   if (activePositiveFilters.holo) matches.push(card.holo == 1);
+                  if (activePositiveFilters.firstEdition) matches.push(card.firstEdition == 1);
+
                   if (activePositiveFilters.shiny) {
                     const isShiny = card.subTypes?.toLowerCase().includes("radiant") || card.rarity?.toLowerCase().includes("shiny");
                     matches.push(isShiny);
@@ -930,7 +973,6 @@ document.addEventListener("DOMContentLoaded", () => {
               }
           
               // 🧠 Zeilen-Sichtbarkeit auf Basis der Filterlogik
-              const hasPositive = Object.values(filterStates).includes("positive");
               const isOnlyNegative = Object.values(filterStates).every(v => v === "neutral" || v === "negative");
           
               if (ausblenden) {
@@ -967,6 +1009,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Negative Filter
             if (filterStates.reverse === "negative" && card.reverse == 1) show = false;
             if (filterStates.holo === "negative" && card.holo == 1) show = false;
+            if (filterStates.firstEdition === "negative" && card.firstEdition == 1) show = false;
             if (filterStates.v === "negative" && (card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
     
             const isVMAX = card.subTypes?.toLowerCase().includes("vmax") || card.cardName?.toLowerCase().includes(" vmax");
@@ -981,6 +1024,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Positive Filter
             if (filterStates.reverse === "positive" && card.reverse != 1) show = false;
             if (filterStates.holo === "positive" && card.holo != 1) show = false;
+            if (filterStates.firstEdition === "positive" && card.firstEdition != 1) show = false;
             if (filterStates.v === "positive" && !(card.subTypes?.toLowerCase().includes("v") || card.cardName?.toLowerCase().includes(" v"))) show = false;
             if (filterStates.vmax === "positive" && !(isVMAX || isVSTAR)) show = false;
             if (filterStates.ex === "positive" && !(card.subTypes?.toLowerCase().includes("ex") || card.cardName?.toLowerCase().includes(" ex"))) show = false;
@@ -999,11 +1043,6 @@ document.addEventListener("DOMContentLoaded", () => {
       updateGesamtwert();
     }                     
     
-    function isOnlyNegativeFiltersActive() {
-      return Object.values(filterStates).every(v => v === "neutral" || v === "negative") &&
-             Object.values(filterStates).some(v => v === "negative");
-    }    
-    
     function toggleFilter(type) {
       // Toggle durch die drei Zustände
       if (filterStates[type] === "neutral") {
@@ -1019,7 +1058,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateNavStyles() {
-      const filterTypes = ['reverse', 'holo', 'v', 'vmax', 'ex', 'shiny'];
+      const filterTypes = ['reverse', 'holo', 'firstEdition', 'v', 'vmax', 'ex', 'shiny'];
     
       for (const type of filterTypes) {
         const btn = document.getElementById(`filter-${type}`);
@@ -1040,6 +1079,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       filterStates.reverse = "neutral";
       filterStates.holo = "neutral";
+      filterStates.firstEdition = "neutral";
       filterStates.v = "neutral";
       filterStates.vmax = "neutral";
       filterStates.ex = "neutral";
@@ -1056,6 +1096,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filter-holo").addEventListener("click", (e) => {
       e.preventDefault();
       toggleFilter("holo");
+    });
+
+    document.getElementById("filter-firstEdition").addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleFilter("firstEdition");
     });
 
     document.getElementById("filter-v").addEventListener("click", (e) => {
@@ -1429,6 +1474,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <br>
             <p>Welche Variante möchtest du speichern?</p>
             <button class="overlayMenuBtn" id="btnBasic">Basic</button>
+            <button class="overlayMenuBtn" id="btnFirstEdition">First Edition</button>
+            <br>
             <button class="overlayMenuBtn" id="btnReverse">Reverse</button>
             <button class="overlayMenuBtn" id="btnHolo">Holo</button>
             <br><br>
@@ -1465,6 +1512,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }        
     
         document.getElementById("btnBasic").addEventListener("click", () => finalizeTrainerSelection("basic", trainerDbId));
+        document.getElementById("btnFirstEdition").addEventListener("click", () => finalizeTrainerSelection("firstEdition", trainerDbId));
         document.getElementById("btnReverse").addEventListener("click", () => finalizeTrainerSelection("reverse", trainerDbId));
         document.getElementById("btnHolo").addEventListener("click", () => finalizeTrainerSelection("holo", trainerDbId));
         document.getElementById("closeOverlayConfirm").addEventListener("click", () => finalizeTrainerSelection("none", trainerDbId));
@@ -1533,11 +1581,6 @@ document.addEventListener("DOMContentLoaded", () => {
           hinzugefügtAm = datum.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
     
-        let variante = "Keine Angabe";
-        if (card.basic == 1) variante = "Basic";
-        if (card.reverse == 1) variante = "Reverse";
-        if (card.holo == 1) variante = "Holo";
-    
         // 💶 Preis formatieren
         let wert30d = card.avg30;
         let preisText = "–";
@@ -1567,7 +1610,15 @@ document.addEventListener("DOMContentLoaded", () => {
               <div style="display:flex; flex-direction:column; align-items:center;">
                 <img id="cardImage" src="cardBackside.png" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                 <p style="margin-top:10px;">
-                  ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
+                  ID: ${card.cardId} | Variante:
+                  <select id="variantSelect">
+                    <option value="none" ${card.basic != 1 && card.reverse != 1 && card.holo != 1 ? "selected" : ""}>Keine Angabe</option>
+                    <option value="basic" ${card.basic == 1 ? "selected" : ""}>Basic</option>
+                    <option value="reverse" ${card.reverse == 1 ? "selected" : ""}>Reverse</option>
+                    <option value="holo" ${card.holo == 1 ? "selected" : ""}>Holo</option>
+                    <option value="firstEdition" ${card.firstEdition == 1 ? "selected" : ""}>First Edition</option>
+                  </select>
+                  <br>
                   30d-Wert: <strong>${preisText}</strong><br>
                   Hinzugefügt am: <strong>${hinzugefügtAm}</strong>
                 </p>
@@ -1577,6 +1628,39 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="deleteTrainer">❌ Karte löschen</button>
           </div>
         `;
+
+        document.getElementById("variantSelect").addEventListener("change", async function () {
+          const selected = this.value;
+        
+          // Nur 1 Variante darf aktiv sein
+          let basic = 0, reverse = 0, holo = 0, firstEdition = 0;
+          if (selected === "basic") basic = 1;
+          else if (selected === "reverse") reverse = 1;
+          else if (selected === "holo") holo = 1;
+          else if (selected === "firstEdition") firstEdition = 1;
+        
+          try {
+            await db.run(
+              `UPDATE cards SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
+              [basic, reverse, holo, firstEdition, id]
+            );
+            
+            // Cache aktualisieren
+            const cached = window.cachedCards?.[card.cardId];
+            if (cached) {
+              cached.basic = basic;
+              cached.reverse = reverse;
+              cached.holo = holo;
+              cached.firstEdition = firstEdition;
+            }
+        
+            console.log("Variante aktualisiert und Cache angepasst:", selected);
+          } catch (err) {
+            console.error("Fehler beim Aktualisieren der Variante:", err);
+            console.error("Fehlerdetails:", JSON.stringify(err));
+            alert("Fehler beim Speichern der Variante.");
+          }
+        });        
 
         const img = new Image();
         img.onload = () => {
@@ -1898,6 +1982,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <br>
             <p>Welche Variante möchtest du speichern?</p>
             <button class="overlayMenuBtn" id="btnBasic">Basic</button>
+            <button class="overlayMenuBtn" id="btnFirstEdition">First Edition</button>
+            <br>
             <button class="overlayMenuBtn" id="btnReverse">Reverse</button>
             <button class="overlayMenuBtn" id="btnHolo">Holo</button>
             <br><br>
@@ -1930,6 +2016,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }        
     
         document.getElementById("btnBasic").addEventListener("click", () => finalizeEnergieSelection("basic", energieDbId));
+        document.getElementById("btnFirstEdition").addEventListener("click", () => finalizeEnergieSelection("firstEdition", energieDbId));
         document.getElementById("btnReverse").addEventListener("click", () => finalizeEnergieSelection("reverse", energieDbId));
         document.getElementById("btnHolo").addEventListener("click", () => finalizeEnergieSelection("holo", energieDbId));
         document.getElementById("closeOverlayConfirm").addEventListener("click", () => finalizeEnergieSelection("none", energieDbId));
@@ -1996,11 +2083,6 @@ document.addEventListener("DOMContentLoaded", () => {
           hinzugefügtAm = datum.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
     
-        let variante = "Keine Angabe";
-        if (card.basic == 1) variante = "Basic";
-        if (card.reverse == 1) variante = "Reverse";
-        if (card.holo == 1) variante = "Holo";
-    
         // 💶 Preis formatieren
         let wert30d = card.avg30;
         let preisText = "–";
@@ -2030,7 +2112,15 @@ document.addEventListener("DOMContentLoaded", () => {
               <div style="display:flex; flex-direction:column; align-items:center;">
                 <img id="cardImage" src="cardBackside.png" alt="${id}" style="max-width:300px; max-height:400px; margin:0 20px;">
                 <p style="margin-top:10px;">
-                  ID: ${card.cardId} | Variante: <strong>${variante}</strong><br>
+                  ID: ${card.cardId} | Variante:
+                  <select id="variantSelect">
+                    <option value="none" ${card.basic != 1 && card.reverse != 1 && card.holo != 1 ? "selected" : ""}>Keine Angabe</option>
+                    <option value="basic" ${card.basic == 1 ? "selected" : ""}>Basic</option>
+                    <option value="reverse" ${card.reverse == 1 ? "selected" : ""}>Reverse</option>
+                    <option value="holo" ${card.holo == 1 ? "selected" : ""}>Holo</option>
+                    <option value="firstEdition" ${card.firstEdition == 1 ? "selected" : ""}>First Edition</option>
+                  </select>
+                  <br>
                   30d-Wert: <strong>${preisText}</strong><br>
                   Hinzugefügt am: <strong>${hinzugefügtAm}</strong>
                 </p>
@@ -2040,6 +2130,39 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="deleteEnergie">❌ Karte löschen</button>
           </div>
         `;
+
+        document.getElementById("variantSelect").addEventListener("change", async function () {
+          const selected = this.value;
+        
+          // Nur 1 Variante darf aktiv sein
+          let basic = 0, reverse = 0, holo = 0, firstEdition = 0;
+          if (selected === "basic") basic = 1;
+          else if (selected === "reverse") reverse = 1;
+          else if (selected === "holo") holo = 1;
+          else if (selected === "firstEdition") firstEdition = 1;
+        
+          try {
+            await db.run(
+              `UPDATE cards SET basic = ?, reverse = ?, holo = ?, firstEdition = ? WHERE id = ?`,
+              [basic, reverse, holo, firstEdition, id]
+            );
+            
+            // Cache aktualisieren
+            const cached = window.cachedCards?.[card.cardId];
+            if (cached) {
+              cached.basic = basic;
+              cached.reverse = reverse;
+              cached.holo = holo;
+              cached.firstEdition = firstEdition;
+            }
+        
+            console.log("Variante aktualisiert und Cache angepasst:", selected);
+          } catch (err) {
+            console.error("Fehler beim Aktualisieren der Variante:", err);
+            console.error("Fehlerdetails:", JSON.stringify(err));
+            alert("Fehler beim Speichern der Variante.");
+          }
+        });           
         
         const img = new Image();
         img.onload = () => {
