@@ -326,6 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
               updateKartenAnzahl();
               updateGesamtwert();
               applyFilter();
+              searchTable();
             }
           });
     
@@ -684,6 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateKartenAnzahl();
         updateGesamtwert();
         applyFilter();
+        searchTable();
       }
     
       document.getElementById("btnBasic").addEventListener("click", () => finalizeCardSelection("basic"));
