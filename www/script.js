@@ -1328,7 +1328,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
 
-                cards = await fetchAllTrainerCards(subType);
+                const cards = await fetchAllTrainerCards(subType);
 
                 if (!cards || cards.length === 0) {
                     overlayElement.innerHTML = `
@@ -1795,7 +1795,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
 
-                cards = await fetchAllEnergieCards(subType);
+                const cards = await fetchAllEnergieCards(subType);
 
                 if (!cards || cards.length === 0) {
                     overlayElement.innerHTML = `
